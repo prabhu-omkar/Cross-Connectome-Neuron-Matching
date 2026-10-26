@@ -1,0 +1,22 @@
+# Phase 1 data settings. Changing anything here changes data/ — rerun `python -m flymatch.run data`.
+out_dir: data                     # relative to repo root; ablation A9 uses a different out_dir
+
+# 7.1.4 — minimum synapses per neuron PAIR (summed over neuropils), per dataset
+threshold: {mcns: 5, banc: 5}
+
+# 7.1.3 — inclusion rules
+min_total_synapses: 20            # in + out, after thresholding. Frozen after week 1.
+include_sides: [left, right, center]
+
+# 7.1.6 — ground truth
+gt_sources: [primary, flywire, manc]   # priority order for MaleCNS type_h
+fallback_max_superclass_fail: 0.10     # drop a fallback source if more of its types fail
+mcns_clean_status: [Reviewed]
+# BANC clean subset (needs external/banc_dataverse_v3/banc_888_meta.feather):
+# proofread == TRUE and status contains none of these flags
+banc_unclean_status_flags: [TRACING_ISSUE, LR_TYPE_CONFLICT, ALIGNMENT_CELL_TYPE, UNROOTED, TOO_SMALL]
+
+# 7.1.8 — splits
+split_seed: 20261026
+split_fractions: {train: 0.70, val: 0.10, test: 0.20}
+size_buckets: [[1, 1, "1"], [2, 2, "2"], [3, 10, "3-10"], [11, 100, "11-100"], [101, 1000000000, ">100"]]

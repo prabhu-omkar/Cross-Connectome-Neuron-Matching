@@ -1,0 +1,6 @@
+# Copy to configs/paths.yaml (git-ignored) and edit for your machine.
+# Relative paths are resolved against the repository root.
+raw_root: ..
+mcns_dir: ../MCNS_male_brain_and_nerve_cord
+banc_dir: ../BANC_female_brain_and_nerve_cord
+external_dir: ../external

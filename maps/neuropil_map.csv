@@ -1,0 +1,246 @@
+dataset,raw,canonical,region,include,confidence,note
+mcns,AB_L,FB,CB,1,medium,asymmetric body beside FB; BANC has no AB
+mcns,AB_R,FB,CB,1,medium,asymmetric body beside FB; BANC has no AB
+mcns,ADMN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,ADMN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,AL_L,AL_L,CB,1,high,identical name
+mcns,AL_R,AL_R,CB,1,high,identical name
+mcns,AME_L,AME_L,OL,1,high,identical name
+mcns,AME_R,AME_R,OL,1,high,identical name
+mcns,ANm,ANm,VNC,1,high,identical name
+mcns,AOTU_L,AOTU_L,CB,1,high,identical name
+mcns,AOTU_R,AOTU_R,CB,1,high,identical name
+mcns,ATL_L,ATL_L,CB,1,high,identical name
+mcns,ATL_R,ATL_R,CB,1,high,identical name
+mcns,AVLP_L,AVLP_L,CB,1,high,identical name
+mcns,AVLP_R,AVLP_R,CB,1,high,identical name
+mcns,AbN1_R,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN2_L,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN2_R,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN3_L,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN3_R,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN4_L,NERVE,nerve,0,high,peripheral nerve
+mcns,AbN4_R,NERVE,nerve,0,high,peripheral nerve
+mcns,AbNT_L,NERVE,nerve,0,high,peripheral nerve
+mcns,AbNT_R,NERVE,nerve,0,high,peripheral nerve
+mcns,BU_L,BU_L,CB,1,high,identical name
+mcns,BU_R,BU_R,CB,1,high,identical name
+mcns,CAN_L,CAN_L,CB,1,high,identical name
+mcns,CAN_R,CAN_R,CB,1,high,identical name
+mcns,CB_UNASGD,UNASSIGNED,unassigned,0,high,unassigned bucket
+mcns,CRE_L,CRE_L,CB,1,high,identical name
+mcns,CRE_R,CRE_R,CB,1,high,identical name
+mcns,CV_UNASGD,UNASSIGNED,unassigned,0,high,neck connective; too few BANC synapses to compare (32 vs 2159)
+mcns,CvN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,DMetaN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,DMetaN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,DProN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,DProN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,EB,EB,CB,1,high,identical name
+mcns,EPA_L,EPA_L,CB,1,high,identical name
+mcns,EPA_R,EPA_R,CB,1,high,identical name
+mcns,FB,FB,CB,1,high,identical name
+mcns,FLA_L,FLA_L,CB,1,high,identical name
+mcns,FLA_R,FLA_R,CB,1,high,identical name
+mcns,GNG,GNG,GNG,1,high,identical name
+mcns,GOR_L,GOR_L,CB,1,high,identical name
+mcns,GOR_R,GOR_R,CB,1,high,identical name
+mcns,HTct_UTct_T3_L,HTct_UTct_T3_L,VNC,1,high,identical name
+mcns,HTct_UTct_T3_R,HTct_UTct_T3_R,VNC,1,high,identical name
+mcns,IB,IB,CB,1,high,MaleCNS does not split IB by side
+mcns,ICL_L,ICL_L,CB,1,high,identical name
+mcns,ICL_R,ICL_R,CB,1,high,identical name
+mcns,IPS_L,IPS_L,CB,1,high,identical name
+mcns,IPS_R,IPS_R,CB,1,high,identical name
+mcns,IntTct,IntTct,VNC,1,high,identical name
+mcns,LAL_L,LAL_L,CB,1,high,identical name
+mcns,LAL_R,LAL_R,CB,1,high,identical name
+mcns,LA_L,LA_L,OL,0,high,lamina: MaleCNS only
+mcns,LA_R,LA_R,OL,0,high,lamina: MaleCNS only
+mcns,LH_L,LH_L,CB,1,high,identical name
+mcns,LH_R,LH_R,CB,1,high,identical name
+mcns,LOP_L,LOP_L,OL,1,high,identical name
+mcns,LOP_R,LOP_R,OL,1,high,identical name
+mcns,LO_L,LO_L,OL,1,high,identical name
+mcns,LO_R,LO_R,OL,1,high,identical name
+mcns,LTct,LTct,VNC,1,high,identical name
+mcns,LegNp_T1_L,LegNp_T1_L,VNC,1,high,identical name
+mcns,LegNp_T1_R,LegNp_T1_R,VNC,1,high,identical name
+mcns,LegNp_T2_L,LegNp_T2_L,VNC,1,high,identical name
+mcns,LegNp_T2_R,LegNp_T2_R,VNC,1,high,identical name
+mcns,LegNp_T3_L,LegNp_T3_L,VNC,1,high,identical name
+mcns,LegNp_T3_R,LegNp_T3_R,VNC,1,high,identical name
+mcns,MB_CA_L,MB_CA_L,CB,1,high,identical name
+mcns,MB_CA_R,MB_CA_R,CB,1,high,identical name
+mcns,MB_ML_L,MB_ML_L,CB,1,high,identical name
+mcns,MB_ML_R,MB_ML_R,CB,1,high,identical name
+mcns,MB_PED_L,MB_PED_L,CB,1,high,identical name
+mcns,MB_PED_R,MB_PED_R,CB,1,high,identical name
+mcns,MB_VL_L,MB_VL_L,CB,1,high,identical name
+mcns,MB_VL_R,MB_VL_R,CB,1,high,identical name
+mcns,ME_L,ME_L,OL,1,high,identical name
+mcns,ME_R,ME_R,OL,1,high,identical name
+mcns,MesoAN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,MesoAN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,MesoLN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,MesoLN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,MetaLN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,MetaLN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,NO,NO,CB,1,high,identical name
+mcns,NTct_UTct_T1_L,NTct_UTct_T1_L,VNC,1,high,identical name
+mcns,NTct_UTct_T1_R,NTct_UTct_T1_R,VNC,1,high,identical name
+mcns,OL_UNASGD_L,UNASSIGNED,unassigned,0,high,unassigned bucket
+mcns,OL_UNASGD_R,UNASSIGNED,unassigned,0,high,unassigned bucket
+mcns,Ov_L,Ov_L,VNC,1,high,identical name
+mcns,Ov_R,Ov_R,VNC,1,high,identical name
+mcns,PB,PB,CB,1,high,identical name
+mcns,PDMN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,PDMN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,PLP_L,PLP_L,CB,1,high,identical name
+mcns,PLP_R,PLP_R,CB,1,high,identical name
+mcns,PRW,PRW,GNG,1,high,identical name
+mcns,PVLP_L,PVLP_L,CB,1,high,identical name
+mcns,PVLP_R,PVLP_R,CB,1,high,identical name
+mcns,PrN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,ProAN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,ProAN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,ProLN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,ProLN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,SAD,SAD_AMMC,GNG,1,medium,MaleCNS has no separate AMMC
+mcns,SCL_L,SCL_L,CB,1,high,identical name
+mcns,SCL_R,SCL_R,CB,1,high,identical name
+mcns,SIP_L,SIP_L,CB,1,high,identical name
+mcns,SIP_R,SIP_R,CB,1,high,identical name
+mcns,SLP_L,SLP_L,CB,1,high,identical name
+mcns,SLP_R,SLP_R,CB,1,high,identical name
+mcns,SMP_L,SMP_L,CB,1,high,identical name
+mcns,SMP_R,SMP_R,CB,1,high,identical name
+mcns,SPS_L,SPS_L,CB,1,high,identical name
+mcns,SPS_R,SPS_R,CB,1,high,identical name
+mcns,UNASGD,UNASSIGNED,unassigned,0,high,unassigned bucket
+mcns,VES_L,VES_L,CB,1,high,identical name
+mcns,VES_R,VES_R,CB,1,high,identical name
+mcns,VNC_UNASGD,UNASSIGNED,unassigned,0,high,unassigned bucket
+mcns,VProN_L,NERVE,nerve,0,high,peripheral nerve
+mcns,VProN_R,NERVE,nerve,0,high,peripheral nerve
+mcns,WED_L,WED_L,CB,1,high,identical name
+mcns,WED_R,WED_R,CB,1,high,identical name
+mcns,WTct_UTct_T2_L,WTct_UTct_T2_L,VNC,1,high,identical name
+mcns,WTct_UTct_T2_R,WTct_UTct_T2_R,VNC,1,high,identical name
+mcns,mVAC_T1_L,LegNp_T1_L,VNC,1,low,BANC has no T1/T3 mVAC; assumed inside its ProNm/MetaNm
+mcns,mVAC_T1_R,LegNp_T1_R,VNC,1,low,BANC has no T1/T3 mVAC; assumed inside its ProNm/MetaNm
+mcns,mVAC_T2_L,mVAC_T2_L,VNC,0,medium,"same structure, different prefix; EXCLUDED: failed r>=0.5 merge validation on training pairs (r=0.22-0.27)"
+mcns,mVAC_T2_R,mVAC_T2_R,VNC,0,medium,"same structure, different prefix; EXCLUDED: failed r>=0.5 merge validation on training pairs (r=0.22-0.27)"
+mcns,mVAC_T3_L,LegNp_T3_L,VNC,1,low,BANC has no T1/T3 mVAC; assumed inside its ProNm/MetaNm
+mcns,mVAC_T3_R,LegNp_T3_R,VNC,1,low,BANC has no T1/T3 mVAC; assumed inside its ProNm/MetaNm
+banc,ABDNM_L,ANm,VNC,1,medium,abdominal neuromeres; MaleCNS ANm is unsided
+banc,ABDNM_R,ANm,VNC,1,medium,abdominal neuromeres; MaleCNS ANm is unsided
+banc,AL_L,AL_L,CB,1,high,identical name
+banc,AL_R,AL_R,CB,1,high,identical name
+banc,AME_L,AME_L,OL,1,high,identical name
+banc,AME_R,AME_R,OL,1,high,identical name
+banc,AMMC_L,SAD_AMMC,GNG,1,medium,MaleCNS has no separate AMMC
+banc,AMMC_R,SAD_AMMC,GNG,1,medium,MaleCNS has no separate AMMC
+banc,ANm,ANm,VNC,1,high,identical name
+banc,AOTU_L,AOTU_L,CB,1,high,identical name
+banc,AOTU_R,AOTU_R,CB,1,high,identical name
+banc,ATL_L,ATL_L,CB,1,high,identical name
+banc,ATL_R,ATL_R,CB,1,high,identical name
+banc,AVLP_L,AVLP_L,CB,1,high,identical name
+banc,AVLP_R,AVLP_R,CB,1,high,identical name
+banc,BU_L,BU_L,CB,1,high,identical name
+banc,BU_R,BU_R,CB,1,high,identical name
+banc,CAN_L,CAN_L,CB,1,high,identical name
+banc,CAN_R,CAN_R,CB,1,high,identical name
+banc,CRE_L,CRE_L,CB,1,high,identical name
+banc,CRE_R,CRE_R,CB,1,high,identical name
+banc,EB,EB,CB,1,high,identical name
+banc,EPA_L,EPA_L,CB,1,high,identical name
+banc,EPA_R,EPA_R,CB,1,high,identical name
+banc,FB,FB,CB,1,high,identical name
+banc,FLA_L,FLA_L,CB,1,high,identical name
+banc,FLA_R,FLA_R,CB,1,high,identical name
+banc,GA_L,LAL_L,CB,1,medium,gall is a sub-region of LAL
+banc,GA_R,LAL_R,CB,1,medium,gall is a sub-region of LAL
+banc,GNG,GNG,GNG,1,high,identical name
+banc,GOR_L,GOR_L,CB,1,high,identical name
+banc,GOR_R,GOR_R,CB,1,high,identical name
+banc,HTct_UTct_T3_L,HTct_UTct_T3_L,VNC,1,high,identical name
+banc,HTct_UTct_T3_R,HTct_UTct_T3_R,VNC,1,high,identical name
+banc,IB_L,IB,CB,1,high,MaleCNS does not split IB by side
+banc,IB_R,IB,CB,1,high,MaleCNS does not split IB by side
+banc,ICL_L,ICL_L,CB,1,high,identical name
+banc,ICL_R,ICL_R,CB,1,high,identical name
+banc,IPS_L,IPS_L,CB,1,high,identical name
+banc,IPS_R,IPS_R,CB,1,high,identical name
+banc,IntTct,IntTct,VNC,1,high,identical name
+banc,LAL_L,LAL_L,CB,1,high,identical name
+banc,LAL_R,LAL_R,CB,1,high,identical name
+banc,LH_L,LH_L,CB,1,high,identical name
+banc,LH_R,LH_R,CB,1,high,identical name
+banc,LOP_L,LOP_L,OL,1,high,identical name
+banc,LOP_R,LOP_R,OL,1,high,identical name
+banc,LO_L,LO_L,OL,1,high,identical name
+banc,LO_R,LO_R,OL,1,high,identical name
+banc,LTct,LTct,VNC,1,high,identical name
+banc,LegNp_T1_L,LegNp_T1_L,VNC,1,high,identical name
+banc,LegNp_T1_R,LegNp_T1_R,VNC,1,high,identical name
+banc,LegNp_T2_L,LegNp_T2_L,VNC,1,high,identical name
+banc,LegNp_T2_R,LegNp_T2_R,VNC,1,high,identical name
+banc,LegNp_T3_L,LegNp_T3_L,VNC,1,high,identical name
+banc,LegNp_T3_R,LegNp_T3_R,VNC,1,high,identical name
+banc,MB_CA_L,MB_CA_L,CB,1,high,identical name
+banc,MB_CA_R,MB_CA_R,CB,1,high,identical name
+banc,MB_ML_L,MB_ML_L,CB,1,high,identical name
+banc,MB_ML_R,MB_ML_R,CB,1,high,identical name
+banc,MB_PED_L,MB_PED_L,CB,1,high,identical name
+banc,MB_PED_R,MB_PED_R,CB,1,high,identical name
+banc,MB_VL_L,MB_VL_L,CB,1,high,identical name
+banc,MB_VL_R,MB_VL_R,CB,1,high,identical name
+banc,ME_L,ME_L,OL,1,high,identical name
+banc,ME_R,ME_R,OL,1,high,identical name
+banc,NO,NO,CB,1,high,identical name
+banc,NTct_UTct_T1_L,NTct_UTct_T1_L,VNC,1,high,identical name
+banc,NTct_UTct_T1_R,NTct_UTct_T1_R,VNC,1,high,identical name
+banc,PB,PB,CB,1,high,identical name
+banc,PLP_L,PLP_L,CB,1,high,identical name
+banc,PLP_R,PLP_R,CB,1,high,identical name
+banc,PRW,PRW,GNG,1,high,identical name
+banc,PVLP_L,PVLP_L,CB,1,high,identical name
+banc,PVLP_R,PVLP_R,CB,1,high,identical name
+banc,SAD,SAD_AMMC,GNG,1,medium,MaleCNS has no separate AMMC
+banc,SCL_L,SCL_L,CB,1,high,identical name
+banc,SCL_R,SCL_R,CB,1,high,identical name
+banc,SIP_L,SIP_L,CB,1,high,identical name
+banc,SIP_R,SIP_R,CB,1,high,identical name
+banc,SLP_L,SLP_L,CB,1,high,identical name
+banc,SLP_R,SLP_R,CB,1,high,identical name
+banc,SMP_L,SMP_L,CB,1,high,identical name
+banc,SMP_R,SMP_R,CB,1,high,identical name
+banc,SPS_L,SPS_L,CB,1,high,identical name
+banc,SPS_R,SPS_R,CB,1,high,identical name
+banc,Tct,UNASSIGNED,unassigned,0,high,unassigned bucket
+banc,VES_L,VES_L,CB,1,high,identical name
+banc,VES_R,VES_R,CB,1,high,identical name
+banc,VNC_AMNp_L,Ov_L,VNC,1,low,accessory mesothoracic neuropil (AMNp) = older name of the ovoid (Ov)
+banc,VNC_AMNp_R,Ov_R,VNC,1,low,accessory mesothoracic neuropil (AMNp) = older name of the ovoid (Ov)
+banc,VNC_HTct_L,HTct_UTct_T3_L,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,VNC_HTct_R,HTct_UTct_T3_R,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,VNC_NTct_L,NTct_UTct_T1_L,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,VNC_NTct_R,NTct_UTct_T1_R,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,VNC_T1_ProNm_L,LegNp_T1_L,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_T1_ProNm_R,LegNp_T1_R,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_T2_MesoNm_L,LegNp_T2_L,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_T2_MesoNm_R,LegNp_T2_R,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_T2_mVAC_L,mVAC_T2_L,VNC,0,medium,"same structure, different prefix; EXCLUDED: failed r>=0.5 merge validation on training pairs (r=0.22-0.27)"
+banc,VNC_T2_mVAC_R,mVAC_T2_R,VNC,0,medium,"same structure, different prefix; EXCLUDED: failed r>=0.5 merge validation on training pairs (r=0.22-0.27)"
+banc,VNC_T3_MetaNm_L,LegNp_T3_L,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_T3_MetaNm_R,LegNp_T3_R,VNC,1,medium,"BANC leg neuromere; BANC puts >99% of its leg-neuropil synapses here, not in LegNp_*"
+banc,VNC_WTct_L,WTct_UTct_T2_L,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,VNC_WTct_R,WTct_UTct_T2_R,VNC,1,medium,BANC VNC_* tectulum = MaleCNS *_UTct_*
+banc,WED_L,WED_L,CB,1,high,identical name
+banc,WED_R,WED_R,CB,1,high,identical name
+banc,WTct_UTct_T2_L,WTct_UTct_T2_L,VNC,1,high,identical name
+banc,WTct_UTct_T2_R,WTct_UTct_T2_R,VNC,1,high,identical name
+banc,Xnerve,NERVE,nerve,0,high,peripheral nerve
+banc,cervical_connective,UNASSIGNED,unassigned,0,high,neck connective; too few BANC synapses to compare (32 vs 2159)

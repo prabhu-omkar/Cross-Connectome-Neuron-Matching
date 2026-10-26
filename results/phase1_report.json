@@ -1,0 +1,132 @@
+{
+ "splits_sha256": "260be072aa62135be46e33ceb02e859d39428107a5025bcf7ee38a9843b60499",
+ "n_train_pairs": 4746,
+ "harmonisation": {
+  "primary": {
+   "t_mcns": 5,
+   "t_banc": 5,
+   "median_ratio_in_deg": 3.3,
+   "median_ratio_out_deg": 2.751068376068376,
+   "median_ratio_in_syn": 4.833280399274047,
+   "median_ratio_out_syn": 4.16171827449787,
+   "median_ratio_total_degree": 3.0344827586206895
+  },
+  "export": {
+   "setting": "export (MaleCNS>=5, BANC>=3)",
+   "t_mcns": 5,
+   "t_banc": 3,
+   "median_ratio_in_deg": 1.6964285714285714,
+   "median_ratio_out_deg": 1.5197109407376708,
+   "median_ratio_in_syn": 3.731523270861975,
+   "median_ratio_out_syn": 3.3938605473841,
+   "median_ratio_total_degree": 1.6319509202453988
+  },
+  "quantile_matched": {
+   "t_mcns": 15,
+   "t_banc": 5,
+   "median_ratio_in_deg": 1.0666666666666667,
+   "median_ratio_out_deg": 1.0303030303030303,
+   "median_ratio_in_syn": 3.139392630972942,
+   "median_ratio_out_syn": 2.9859219126246987,
+   "median_ratio_total_degree": 1.0596126510305615
+  }
+ },
+ "b1_train_by_superclass": [
+  {
+   "superclass": "ALL",
+   "n": 4746,
+   "R@1": 0.41719342604298354,
+   "R@10": 0.6481247366203119,
+   "R@1_no_merges": 0.3453434471133586,
+   "R@10_no_merges": 0.5663716814159292
+  },
+  {
+   "superclass": "ascending",
+   "n": 307,
+   "R@1": 0.48534201954397393,
+   "R@10": 0.7882736156351792,
+   "R@1_no_merges": 0.1791530944625407,
+   "R@10_no_merges": 0.3713355048859935
+  },
+  {
+   "superclass": "central_brain_intrinsic",
+   "n": 2868,
+   "R@1": 0.3971408647140865,
+   "R@10": 0.6262203626220363,
+   "R@1_no_merges": 0.3089260808926081,
+   "R@10_no_merges": 0.5944909344490934
+  },
+  {
+   "superclass": "descending",
+   "n": 400,
+   "R@1": 0.64,
+   "R@10": 0.8575,
+   "R@1_no_merges": 0.46,
+   "R@10_no_merges": 0.6975
+  },
+  {
+   "superclass": "motor",
+   "n": 91,
+   "R@1": 0.21978021978021978,
+   "R@10": 0.37362637362637363,
+   "R@1_no_merges": 0.3516483516483517,
+   "R@10_no_merges": 0.4065934065934066
+  },
+  {
+   "superclass": "optic_lobe_intrinsic",
+   "n": 14,
+   "R@1": 0.5,
+   "R@10": 0.6428571428571429,
+   "R@1_no_merges": 0.5,
+   "R@10_no_merges": 0.6428571428571429
+  },
+  {
+   "superclass": "sensory",
+   "n": 13,
+   "R@1": 0.07692307692307693,
+   "R@10": 0.15384615384615385,
+   "R@1_no_merges": 0.07692307692307693,
+   "R@10_no_merges": 0.23076923076923078
+  },
+  {
+   "superclass": "sensory_descending",
+   "n": 1,
+   "R@1": 0.0,
+   "R@10": 0.0,
+   "R@1_no_merges": 0.0,
+   "R@10_no_merges": 0.0
+  },
+  {
+   "superclass": "ventral_nerve_cord_intrinsic",
+   "n": 806,
+   "R@1": 0.3337468982630273,
+   "R@10": 0.5570719602977667,
+   "R@1_no_merges": 0.4267990074441687,
+   "R@10_no_merges": 0.4292803970223325
+  },
+  {
+   "superclass": "visceral_endocrine_efferent",
+   "n": 4,
+   "R@1": 0.5,
+   "R@10": 0.5,
+   "R@1_no_merges": 0.25,
+   "R@10_no_merges": 0.25
+  },
+  {
+   "superclass": "visual_centrifugal",
+   "n": 76,
+   "R@1": 0.7236842105263158,
+   "R@10": 0.9210526315789473,
+   "R@1_no_merges": 0.6710526315789473,
+   "R@10_no_merges": 0.9078947368421053
+  },
+  {
+   "superclass": "visual_projection",
+   "n": 166,
+   "R@1": 0.4939759036144578,
+   "R@10": 0.7771084337349398,
+   "R@1_no_merges": 0.46987951807228917,
+   "R@10_no_merges": 0.7530120481927711
+  }
+ ]
+}
