@@ -1,0 +1,16 @@
+# plan.md 7.3.2-7.3.3 starting hyper-parameters (defaults also live in flymatch/train.py DEFAULTS)
+train:
+  max_steps: 3000
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  warmup_steps: 100
+  batch_types: 256
+  per_type_per_side: 4
+  easy_negatives: 1024        # random TRAINING-family typed neurons per dataset per step
+  tau_init: 0.07
+  eval_every: 100
+  patience: 10
+  align: {method: none, weight: 0.1}   # none | coral (class-conditional)
+features: {drop_blocks: []}            # e.g. [hemilineage] for ablation A2
+seed_fraction: 1.0
+draw: 0

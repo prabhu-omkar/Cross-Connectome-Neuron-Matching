@@ -1,0 +1,2 @@
+# B4: the GNN with zero message-passing layers; everything else identical.
+model: {layers: 0, width: 256, out_dim: 128, dropout: 0.1, direction: directed}

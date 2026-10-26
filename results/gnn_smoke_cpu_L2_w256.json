@@ -1,0 +1,13 @@
+{
+ "layers": 2,
+ "width": 256,
+ "nnz": {
+  "mcns": 6242085,
+  "banc": 1528585
+ },
+ "graph_build_s": 3.2,
+ "forward_s": 20.9,
+ "forward_backward_s": 41.9,
+ "peak_rss_gib": 5.43,
+ "grads_ok": true
+}

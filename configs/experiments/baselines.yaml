@@ -1,0 +1,4 @@
+# Phase 2 (weeks 5-6): `python -m flymatch.run baselines`
+eval_split: val
+methods: [B0, B1, B1+region, B2, B2+, B3, B4]
+seeds: [0, 1, 2]          # B0 and B4 only (the others are deterministic)

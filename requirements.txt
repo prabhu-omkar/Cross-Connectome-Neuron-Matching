@@ -8,3 +8,6 @@ matplotlib
 pyyaml
 tqdm
 pytest
+psutil
+neuprint-python   # hemibrain control C1; token in NEUPRINT_APPLICATION_CREDENTIALS
+# torch (CPU): pip install torch --index-url https://download.pytorch.org/whl/cpu

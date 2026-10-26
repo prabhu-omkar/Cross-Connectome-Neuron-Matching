@@ -23,6 +23,13 @@ needed from Phase 3: `pip install -e .[gnn]`.
 .venv\Scripts\python.exe -m pytest -q
 ```
 
+Phase 2 (weeks 5–6):
+
+```powershell
+.venv\Scripts\python.exe -m flymatch.run baselines      # B0–B4 on val -> runs/, results/baselines.csv, F4  (~30 min CPU)
+.venv\Scripts\python.exe -m flymatch.smoke --layers 2   # full-graph GNN forward/backward check
+```
+
 Individual stages: `data` (ingest → harmonise → features → ground truth, ~1.5 min), `split [--freeze]`,
 `report`, `b1`. Everything under `data/` (except `data/splits/`) is regenerated from the four raw
 files; nothing in the raw folders is ever written.
@@ -41,7 +48,13 @@ src/flymatch/
   splits.py              stratified family split, freeze + SHA-256
   retrieval.py           exact blocked cosine retrieval + recall metrics
   report.py              harmonisation report, neuropil-merge validation, GT composition (training pairs only)
-  baselines/profile_cosine.py   B1
+  evaluate.py            THE harness: T1/T2, filters, clean subset, breakdowns, family bootstrap CIs
+  seeds.py               nested seed-family sets for the seed ablation
+  graph.py               sparse A_in / A_out, undirected variant, edge permutation (C4)
+  models/                DirLayer, Encoder (layers=0 = B4), InfoNCE / CORAL / GRL
+  train.py               contrastive training loop (B4 now, GNN in Phase 3)
+  runs.py                run folders + aggregation (refuses other split hashes)
+  baselines/             scorers, B1 profile cosine, B2 NBLAST, B3 cocoa-style, run_all driver
 data/splits/splits_v1.json      FROZEN split (committed) + splits_v1.sha256
 results/                 tables and figures written by scripts
 tests/                   unit tests, data contracts, leakage tests
@@ -52,3 +65,9 @@ tests/                   unit tests, data contracts, leakage tests
 Done: ingest, maps, inclusion, harmonisation, features (462 columns), ground truth (6,765 1:1 pairs,
 9,570 shared types), families, **frozen split** (`sha256 260be072…`), B1 reproduced (val R@1 40.5%).
 Findings, deviations from the plan and open items: [`results/PHASE1_NOTES.md`](results/PHASE1_NOTES.md).
+
+## Phase 2 status (26 Oct 2026) — Gate G2 passed
+
+`results/baselines.csv` is complete. Validation T1 R@1 (mean of both directions): B1 34.7%, B2+ 39.6%,
+B3 39.6% (83.0% filtered), **B4 MLP 61.6 ± 0.7%**. Details and caveats (tie handling, NBLAST coverage):
+[`results/PHASE2_NOTES.md`](results/PHASE2_NOTES.md).

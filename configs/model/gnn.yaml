@@ -1,0 +1,1 @@
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}   # try 1/2/3; undirected = ablation A6
