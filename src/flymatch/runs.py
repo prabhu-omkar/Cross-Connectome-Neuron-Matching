@@ -74,11 +74,13 @@ def aggregate(splits_sha256: str, out: Path) -> pd.DataFrame:
     return res
 
 
-def find_or_new(name: str, config: dict, splits_sha256: str) -> tuple[Path, bool]:
-    """Resume the latest unfinished run with the same name + config hash (has last.pt, no
-    metrics.json); otherwise start a new one. Returns (run_dir, resumed)."""
+def find_or_new(name: str, config: dict, splits_sha256: str) -> tuple[Path, str]:
+    """Look for an earlier run with the same name + config hash. Returns (run_dir, status):
+    'done' (has metrics.json — nothing to do), 'resume' (has last.pt), or 'new'."""
     h = hashlib.sha1(json.dumps(config, sort_keys=True, default=str).encode()).hexdigest()[:8]
     for d in sorted(RUNS.glob(f"*_{name}_{h}"), reverse=True):
-        if (d / "last.pt").exists() and not (d / "metrics.json").exists():
-            return d, True
-    return new_run(name, config, splits_sha256), False
+        if (d / "metrics.json").exists():
+            return d, "done"
+        if (d / "last.pt").exists():
+            return d, "resume"
+    return new_run(name, config, splits_sha256), "new"

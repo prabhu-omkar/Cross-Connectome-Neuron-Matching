@@ -19,7 +19,7 @@ Every number here comes from a script output in `results/` or `data/interim/log_
 - 89 canonical neuropils at first, all present in both datasets. **Merge validation** on training
   1:1 pairs (Pearson r of per-neuron synapse fractions; rule r ≥ 0.5): 20 of 22 merges passed with
   r between 0.64 and 0.94. `mVAC_T2_L/R` failed (r = 0.27 / 0.22) and is now excluded from profiles,
-  which leaves 87. Table: `neuropil_merge_validation.csv`.
+  which leaves 87. Table: `results/neuropil_merge_validation.csv`.
 - 97.0% (MaleCNS) and 99.6% (BANC) of synapses fall in canonical neuropils (target > 90%).
 
 ## Harmonisation (week 2) — `harmonisation_thresholds.csv`, `figures/F2_harmonisation.png`

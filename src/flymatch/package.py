@@ -1,6 +1,6 @@
 """Build dist/flymatch_kaggle.zip: code + configs + the processed data training needs.
 
-Upload the zip as a Kaggle Dataset (see kaggle/README.md). Raw CSVs are NOT included.
+Upload the zip as a Kaggle Dataset (see INSTRUCTIONS.md). Raw CSVs are NOT included.
 """
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import zipfile
 
 from .config import REPO, Layout, load_data_config, sha256_file, write_json
 
-CODE = ["pyproject.toml", "README.md", "src", "configs", "maps", "kaggle"]
+CODE = ["pyproject.toml", "README.md", "INSTRUCTIONS.md", "LICENSE", "src", "configs", "maps", "kaggle"]
 SKIP = ("__pycache__", ".pyc", "paths.yaml", ".egg-info")
 
 

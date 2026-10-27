@@ -38,8 +38,12 @@ def run_experiment(layout: Layout, exp_path: str, seed: int, device: str = "auto
     method = exp.get("method", name)
     run_cfg = {"method": method, "eval_split": "val", "seed": seed, "seed_fraction": cfg["seed_fraction"],
                "draw": cfg["draw"], "train_config": cfg}
-    run, resumed = find_or_new(f"{name}_seed{seed}", run_cfg, ctx.splits_sha256)
-    log(f"[train] {name} seed {seed} -> {run.name}{' (resuming)' if resumed else ''}")
+    run, status = find_or_new(f"{name}_seed{seed}", run_cfg, ctx.splits_sha256)
+    if status == "done":
+        log(f"[train] {name} seed {seed}: already finished in {run.name} — skipping")
+        import json
+        return json.loads((run / "metrics.json").read_text())
+    log(f"[train] {name} seed {seed} -> {run.name}{' (resuming)' if status == 'resume' else ''}")
     t0 = time.time()
     model, Z, info = train(layout, cfg, seed=seed, val_ctx=ctx, log=log, ckpt_dir=run, device=device)
     torch.save(model.state_dict(), run / "model.pt")

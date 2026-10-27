@@ -1,6 +1,7 @@
-# Copy to configs/paths.yaml (git-ignored) and edit for your machine.
-# Relative paths are resolved against the repository root.
-raw_root: ..
-mcns_dir: ../MCNS_male_brain_and_nerve_cord
-banc_dir: ../BANC_female_brain_and_nerve_cord
-external_dir: ../external
+# Copy to configs/paths.yaml (git-ignored) to point at data stored elsewhere.
+# Relative paths are resolved against the repository root. The defaults use the copies
+# shipped in this repository (data/raw, data/external).
+raw_root: data/raw
+mcns_dir: data/raw/mcns
+banc_dir: data/raw/banc
+external_dir: data/external

@@ -19,7 +19,7 @@ Test was not touched.
 
 T1 metrics average both directions (MaleCNS→BANC and BANC→MaleCNS). "Filtered" means the same
 harmonised super class, the same side (or either `center`), and a compatible NT. Figure:
-`figures/F4_recall_at_k_val.png`.
+`results/figures/F4_recall_at_k_val.png`.
 
 **What the GNN must beat:** B4 on unfiltered T1 (61.6 ± 0.7% R@1, MRR 0.70), and B3 on filtered T1
 (83.0%) and on T2 (57.4%).
@@ -77,7 +77,7 @@ Package `data/processed` + `data/interim` for Kaggle, add checkpoint/resume, and
 - **Resume tested:** a 1-layer GNN smoke run was stopped on purpose after the step-4 checkpoint
   (`FLYMATCH_SIMULATE_CRASH_AT=4`). Re-running the same command continued from step 4 and finished.
 - `python -m flymatch.run package` → `dist/flymatch_kaggle.zip` (84 MB: code + processed data, no raw CSVs).
-  Tested from a fresh unzip: the smoke GNN trains end to end. Kaggle steps: `kaggle/README.md`;
+  Tested from a fresh unzip: the smoke GNN trains end to end. Kaggle steps: `INSTRUCTIONS.md`;
   notebook cell: `kaggle/kaggle_train.py`.
 - Remaining for week 7 (user, on Kaggle): run `mlp` (should reproduce B4 ≈ 0.62) and `gnn_L1–L3`,
   3 seeds each; bring back `runs_out.zip` and run `aggregate`.
