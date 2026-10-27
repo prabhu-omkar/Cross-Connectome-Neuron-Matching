@@ -1,0 +1,3 @@
+# B4 through the same train command (GPU sanity check: should reproduce baselines.csv B4 ~0.62 R@1)
+name: mlp
+model: {layers: 0}

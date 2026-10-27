@@ -1,0 +1,4 @@
+# Week 7: first GNN — 2 directed message-passing layer(s); everything else as B4.
+name: gnn_L2
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
+train: {max_steps: 3000, eval_every: 100, patience: 10, checkpoint_every: 200}

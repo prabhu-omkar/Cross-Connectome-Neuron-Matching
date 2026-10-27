@@ -72,3 +72,13 @@ def aggregate(splits_sha256: str, out: Path) -> pd.DataFrame:
     res.to_csv(out, index=False)
     df.to_csv(out.with_name(out.stem + "_all_runs.csv"), index=False)
     return res
+
+
+def find_or_new(name: str, config: dict, splits_sha256: str) -> tuple[Path, bool]:
+    """Resume the latest unfinished run with the same name + config hash (has last.pt, no
+    metrics.json); otherwise start a new one. Returns (run_dir, resumed)."""
+    h = hashlib.sha1(json.dumps(config, sort_keys=True, default=str).encode()).hexdigest()[:8]
+    for d in sorted(RUNS.glob(f"*_{name}_{h}"), reverse=True):
+        if (d / "last.pt").exists() and not (d / "metrics.json").exists():
+            return d, True
+    return new_run(name, config, splits_sha256), False

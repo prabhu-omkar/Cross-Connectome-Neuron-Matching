@@ -67,3 +67,17 @@ harmonised super class, the same side (or either `center`), and a compatible NT.
 ## Next (week 7)
 Package `data/processed` + `data/interim` for Kaggle, add checkpoint/resume, and run the first GNN
 (layers 1–3) against B4. Before claiming H2, run A2 (B4 without hemilineage).
+
+## Week 7 — training infrastructure (done; GPU runs pending)
+- `train.py`: GPU/CPU device choice; checkpoint `last.pt` every 200 steps (atomic write) with model,
+  optimiser, scheduler, τ, RNG states, best checkpoint and history; resumes automatically.
+- `python -m flymatch.run train --exp configs/experiments/<exp>.yaml --seeds 0,1,2` → run folder with
+  `model.pt`, `metrics.json` (full harness on val + family CIs), `ranks.parquet`. Experiments ready:
+  `mlp`, `gnn_L1`, `gnn_L2`, `gnn_L3`.
+- **Resume tested:** a 1-layer GNN smoke run was stopped on purpose after the step-4 checkpoint
+  (`FLYMATCH_SIMULATE_CRASH_AT=4`). Re-running the same command continued from step 4 and finished.
+- `python -m flymatch.run package` → `dist/flymatch_kaggle.zip` (84 MB: code + processed data, no raw CSVs).
+  Tested from a fresh unzip: the smoke GNN trains end to end. Kaggle steps: `kaggle/README.md`;
+  notebook cell: `kaggle/kaggle_train.py`.
+- Remaining for week 7 (user, on Kaggle): run `mlp` (should reproduce B4 ≈ 0.62) and `gnn_L1–L3`,
+  3 seeds each; bring back `runs_out.zip` and run `aggregate`.

@@ -1,0 +1,4 @@
+# Tiny CPU end-to-end check of the GNN path + checkpoint/resume (not a result).
+name: smoke_gnn_cpu
+model: {layers: 1, width: 64, out_dim: 32}
+train: {max_steps: 6, eval_every: 3, checkpoint_every: 2, batch_types: 32, easy_negatives: 128, warmup_steps: 2}

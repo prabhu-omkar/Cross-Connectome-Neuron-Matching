@@ -11,6 +11,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import os
 import time
 
 import numpy as np
@@ -29,7 +30,7 @@ DEFAULTS = {
     "features": {"drop_blocks": []},
     "train": {"max_steps": 3000, "lr": 1e-3, "weight_decay": 1e-4, "warmup_steps": 100,
               "batch_types": 256, "per_type_per_side": 4, "easy_negatives": 1024,
-              "tau_init": 0.07, "eval_every": 100, "patience": 10,
+              "tau_init": 0.07, "eval_every": 100, "patience": 10, "checkpoint_every": 200,
               "align": {"method": "none", "weight": 0.1}},
     "seed_fraction": 1.0, "draw": 0,
 }
@@ -102,38 +103,75 @@ def embed_all(model, data: TrainData) -> dict:
     out = {}
     for ds in ("mcns", "banc"):
         A = data.graphs[ds] if data.graphs else (None, None)
-        out[ds] = model.embed(data.X[ds], *A).numpy()
+        out[ds] = model.embed(data.X[ds], *A).float().cpu().numpy()
     return out
 
 
-def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = None, log=print):
+def pick_device(name: str = "auto") -> torch.device:
+    if name == "auto":
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return torch.device(name)
+
+
+def _save_ckpt(path, state: dict):
+    tmp = path.with_suffix(".tmp")
+    torch.save(state, tmp)
+    tmp.replace(path)            # atomic: a session killed mid-write never corrupts last.pt
+
+
+def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = None, log=print,
+          ckpt_dir=None, device: str = "auto"):
+    """Returns (model, embeddings {ds: [N, d]}, info). If `ckpt_dir` is given, a checkpoint is
+    written every `checkpoint_every` steps and an existing one is resumed from."""
     cfg = merge(DEFAULTS, cfg)
     tc, mc = cfg["train"], cfg["model"]
+    dev = pick_device(device)
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     data = TrainData(layout, cfg)
+    data.X = {ds: x.to(dev) for ds, x in data.X.items()}
+    if data.graphs:
+        data.graphs = {ds: (a.to(dev), b.to(dev)) for ds, (a, b) in data.graphs.items()}
     val_ctx = val_ctx or EvalContext.from_layout(layout, "val")
-    model = Encoder(data.f_in, mc["width"], mc["out_dim"], mc["layers"], mc["dropout"])
-    log_tau = torch.nn.Parameter(torch.tensor(math.log(tc["tau_init"])))
+    model = Encoder(data.f_in, mc["width"], mc["out_dim"], mc["layers"], mc["dropout"]).to(dev)
+    log_tau = torch.nn.Parameter(torch.tensor(math.log(tc["tau_init"]), device=dev))
     opt = torch.optim.AdamW(list(model.parameters()) + [log_tau], lr=tc["lr"], weight_decay=tc["weight_decay"])
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: _schedule(s, tc["warmup_steps"], tc["max_steps"]))
     from .baselines.scorers import EmbeddingScorer
-    best, best_state, bad, history = -1.0, None, 0, []
+    best, best_state, bad, history, best_step, start = -1.0, None, 0, [], 0, 0
+    ckpt = None
+    if ckpt_dir is not None:
+        from pathlib import Path
+        ckpt = Path(ckpt_dir) / "last.pt"
+        if ckpt.exists():
+            st = torch.load(ckpt, map_location=dev, weights_only=False)
+            model.load_state_dict(st["model"]); opt.load_state_dict(st["opt"]); sched.load_state_dict(st["sched"])
+            with torch.no_grad():
+                log_tau.copy_(st["log_tau"])
+            rng.bit_generator.state = st["rng"]
+            torch.set_rng_state(st["torch_rng"])
+            best, best_state, bad, history = st["best"], st["best_state"], st["bad"], st["history"]
+            best_step, start = st["best_step"], st["step"]
+            log(f"  resumed from step {start} (best val MRR {best:.3f} at step {best_step})")
+            if st.get("stopped"):
+                start = tc["max_steps"]
     t0 = time.time()
-    for step in range(tc["max_steps"]):
+    stopped = False
+    for step in range(start, tc["max_steps"]):
         model.train()
         b = data.sample(rng, tc["batch_types"], tc["per_type_per_side"])
         for ds in ("mcns", "banc"):
             neg = rng.choice(data.neg_pool[ds], tc["easy_negatives"], replace=False)
             b[ds] = np.unique(np.concatenate([b[ds], neg]))
+        bi = {ds: torch.as_tensor(b[ds], device=dev) for ds in b}
         if data.graphs:
-            z = {ds: model(data.X[ds], *data.graphs[ds])[torch.as_tensor(b[ds])] for ds in b}
+            z = {ds: model(data.X[ds], *data.graphs[ds])[bi[ds]] for ds in b}
         else:
-            z = {ds: model(data.X[ds][torch.as_tensor(b[ds])]) for ds in b}
+            z = {ds: model(data.X[ds][bi[ds]]) for ds in b}
         ta, tb = data.type_code["mcns"][b["mcns"]], data.type_code["banc"][b["banc"]]
         sa, sb = data.side_code["mcns"][b["mcns"]], data.side_code["banc"][b["banc"]]
-        same_t = torch.as_tensor(ta[:, None] == tb[None, :])
-        pos = same_t & torch.as_tensor(sa[:, None] == sb[None, :])
+        same_t = torch.as_tensor(ta[:, None] == tb[None, :], device=dev)
+        pos = same_t & torch.as_tensor(sa[:, None] == sb[None, :], device=dev)
         loss = multi_pos_infonce(z["mcns"], z["banc"], pos, log_tau, valid=~same_t)
         if tc["align"]["method"] == "coral":
             # class-conditional: only neurons of shared seed types in the batch
@@ -153,14 +191,24 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
                 f"val MRR {mrr:.3f} R@1 {m['T1/unfiltered/mean/R@1']:.3f} ({time.time() - t0:.0f}s)")
             if mrr > best:
                 best, bad = mrr, 0
-                best_state = copy.deepcopy(model.state_dict())
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
                 best_step = step + 1
             else:
                 bad += 1
                 if bad >= tc["patience"]:
                     log(f"  early stop at step {step + 1}; best step {best_step}")
-                    break
+                    stopped = True
+        if ckpt is not None and ((step + 1) % tc["checkpoint_every"] == 0 or stopped or step + 1 == tc["max_steps"]):
+            _save_ckpt(ckpt, {"step": step + 1, "model": model.state_dict(), "opt": opt.state_dict(),
+                              "sched": sched.state_dict(), "log_tau": log_tau.detach(), "rng": rng.bit_generator.state,
+                              "torch_rng": torch.get_rng_state(), "best": best, "best_state": best_state,
+                              "bad": bad, "history": history, "best_step": best_step, "stopped": stopped,
+                              "config": cfg, "seed": seed})
+            if os.environ.get("FLYMATCH_SIMULATE_CRASH_AT") == str(step + 1):   # resume test hook
+                raise SystemExit(f"simulated crash after checkpoint at step {step + 1}")
+        if stopped:
+            break
     model.load_state_dict(best_state)
     return model, embed_all(model, data), {"history": history, "best_val_MRR": best, "best_step": best_step,
                                            "n_seed_types": len(data.seed_types), "n_train_types_used": len(data.types),
-                                           "config": cfg, "seed": seed}
+                                           "config": cfg, "seed": seed, "device": str(dev)}
