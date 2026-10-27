@@ -1,6 +1,6 @@
 # Copy to configs/paths.yaml (git-ignored) to point at data stored elsewhere.
-# Relative paths are resolved against the repository root. The defaults use the copies
-# shipped in this repository (data/raw, data/external).
+# Relative paths are resolved against the repository root. The defaults expect the downloads
+# in data/raw and data/external (see README -> The data).
 raw_root: data/raw
 mcns_dir: data/raw/mcns
 banc_dir: data/raw/banc

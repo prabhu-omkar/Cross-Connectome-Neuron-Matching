@@ -4,6 +4,7 @@ Copyright 2026 prabhu-omkar
 This product includes software developed as a final-year B.E. project.
 Licensed under the Apache License, Version 2.0 (see LICENSE).
 
-Third-party data redistributed in data/raw and data/external is licensed under
+Third-party data used by this project (downloaded into data/raw and data/external,
+not stored in this repository) is licensed under
 CC BY 4.0 by its original authors (BANC: Bates et al. 2026; MaleCNS: Janelia FlyEM);
 see DATA_LICENSE.md for attribution.

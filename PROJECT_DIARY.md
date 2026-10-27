@@ -185,8 +185,10 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
   same command resumed at step 4 and finished.
 - `run package` → `flymatch_kaggle.zip` (84 MB). Tested from a fresh unzip: trains end to end.
 - Kaggle guide: [`INSTRUCTIONS.md`](INSTRUCTIONS.md).
-- Repository published on GitHub with a detailed README, this diary, the Apache-2.0 licence, and the datasets
-  (raw exports in the repo; NBLAST matrix and Kaggle package as Release assets).
+- Repository published on GitHub with a detailed README, this diary and the Apache-2.0 licence. The raw exports
+  stay out of git (too large; download instructions in the README).
+- Kaggle package published as a public dataset (`omkarprabhuuuu/flymatch`) with a public one-click notebook
+  (`flymatch-train`); the code is also in `kaggle/flymatch_train.ipynb`.
 
 **Next**
 - Run `mlp` (it should reproduce ≈ 0.62) and `gnn_L1–L3` × 3 seeds on Kaggle; bring back `runs_out.zip`;

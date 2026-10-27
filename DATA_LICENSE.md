@@ -1,13 +1,13 @@
 # Data licence and attribution
 
 The **code** in this repository is licensed under the Apache License 2.0 ([LICENSE](LICENSE)).
-The **data** is not ours. It is redistributed unmodified, for reproducibility, under its original licences:
+The **data** is not ours. It is **not stored in this repository** (too large for GitHub); download it from the sources below into the paths shown. Original licences:
 
 | Files | Origin | Licence |
 |---|---|---|
 | `data/raw/mcns/neurons.csv.gz`, `data/raw/mcns/connections_princeton.csv.gz` | MaleCNS v1.0 (Janelia FlyEM), exported from FlyWire Codex | CC BY 4.0 |
 | `data/raw/banc/neurons.csv.gz`, `data/raw/banc/connections_princeton.csv.gz` | BANC v888, exported from FlyWire Codex | CC BY 4.0 |
-| `data/external/banc_dataverse_v3/*` and the NBLAST matrix in the GitHub Release | BANC Harvard Dataverse, doi:10.7910/DVN/7WTH1N (version 3) | CC BY 4.0 |
+| `data/external/banc_dataverse_v3/*` (incl. the optional NBLAST matrix) | BANC Harvard Dataverse, doi:10.7910/DVN/7WTH1N (version 3) | CC BY 4.0 |
 | `data/splits/`, `maps/`, `results/`, and the processed data in the Kaggle package | derived by this project | CC BY 4.0 |
 
 Under CC BY 4.0 you may share and adapt the data for any purpose, **provided you give appropriate credit**.
