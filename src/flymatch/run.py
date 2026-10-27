@@ -7,7 +7,7 @@
     python -m flymatch.run phase1            # all of the above (split must already be frozen, or pass --freeze)
     python -m flymatch.run baselines [--methods B0,B1,...]   # Phase 2: B0-B4 on val -> runs/, results/baselines.csv
     python -m flymatch.run train --exp configs/experiments/gnn_L2.yaml --seeds 0,1,2 [--device cuda]
-    python -m flymatch.run package           # zip code + processed data for Kaggle
+    python -m flymatch.run package [--parts-mb 20]   # zip code + processed data for Kaggle (optionally in parts)
     python -m flymatch.run aggregate         # runs/ -> results/baselines.csv
 """
 from __future__ import annotations
@@ -28,6 +28,7 @@ def main(argv=None):
     ap.add_argument("--seeds", default=None, help="train: comma list, overrides --seed")
     ap.add_argument("--device", default="auto")
     ap.add_argument("--methods", default=None, help="baselines: comma list of B0,B1,B1+region,B2,B2+,B3,B4")
+    ap.add_argument("--parts-mb", type=int, default=0, help="package: also split the zip into parts of this many MB")
     a = ap.parse_args(argv)
     cfg = load_data_config(a.config)
     t0 = time.time()
@@ -57,7 +58,7 @@ def main(argv=None):
             run_experiment(Layout(cfg), a.exp, s, a.device)
     if a.command == "package":
         from .package import build
-        build(cfg)
+        build(cfg, parts_mb=a.parts_mb)
     if a.command == "aggregate":
         from .config import Layout
         from .runs import aggregate

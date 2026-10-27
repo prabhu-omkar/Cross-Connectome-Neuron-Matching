@@ -1,166 +1,109 @@
-# 🚀 Training on Kaggle — step by step
+# 🚀 Train on Kaggle
 
-The GNN does a full-graph forward pass over **both** connectomes every step (325,000 neurons, 7.8 M edges).
-On a laptop CPU that takes about 42 s per step; on a Kaggle T4 GPU it takes under a second. This guide
-takes you from zero to trained models with results back on your laptop.
+Everything is prepared and public on Kaggle. Copy the notebook, switch on the GPU, press one button.
+Training runs on Kaggle's free GPU in the background — your laptop can be closed.
 
-> **Time needed:** about 15 minutes of clicking once, then about 2 minutes per training session.
-> **Cost:** free. Kaggle gives about 30 GPU-hours per week.
-
----
-
-## 0 · What you need
-
-- A Kaggle account (kaggle.com, sign in with Google), **phone-verified** — unverified accounts get no GPU or internet.
-  Account → Settings → Phone verification.
-- The training package **`flymatch_kaggle.zip`** (84 MB). Get it either way:
-  - **Download it** from this repository's [Releases page](https://github.com/prabhu-omkar/Cross-Connectome-Neuron-Matching/releases), or
-  - **build it yourself** after `python -m flymatch.run data`:
-    ```powershell
-    .venv\Scripts\python.exe -m flymatch.run package      # → dist\flymatch_kaggle.zip
-    ```
-
-The zip holds the code, configs, maps, the frozen split, and the processed tables and features training needs.
-It does not hold the raw CSVs.
+> **Your time:** ~2 minutes. **Training time:** ~2–4 hours (12 runs on a T4). **Cost:** free (Kaggle gives ~30 GPU-hours/week).
+> **Internet is not needed** inside the notebook — every dependency is already on Kaggle.
 
 ---
 
-## 1 · Create the Kaggle Dataset (once)
+## The quick way · use the public Kaggle notebook
 
-1. kaggle.com → left menu **Datasets** → **+ New Dataset**.
-2. Drag in `flymatch_kaggle.zip`. Kaggle unzips it automatically.
-   *(Alternative: choose the **Link** tab and paste the zip's URL from the GitHub Release.)*
-3. Title: **`flymatch`**. Leave visibility **Private**. Click **Create**.
-4. Wait until processing finishes (a minute or two).
+Data and notebook are already on Kaggle, public:
 
-Only re-upload if the code or `data/` changes: open the dataset → **New Version** → upload the new zip.
+- **Dataset:** https://www.kaggle.com/datasets/omkarprabhuuuu/flymatch
+- **Notebook:** https://www.kaggle.com/code/omkarprabhuuuu/flymatch-train
 
----
+1. Sign in at kaggle.com and phone-verify the account once (**Settings → Phone verification**) — unverified accounts get no GPU.
+2. Open the notebook link → **Copy & Edit**. Your copy already has the `flymatch` dataset attached.
+3. Right-hand panel → **Settings → Accelerator → GPU T4 x2** (GPU P100 also works).
+4. Top right: **Save Version → Save & Run All (Commit) → Save**.
 
-## 2 · Create the notebook (once)
+That's it. The public notebook itself has never been run — training happens only in your copy.
+Watch progress under **View Active Events** if you like. The notebook:
 
-1. kaggle.com → **Code** → **+ New Notebook**.
-2. Right-hand panel → **Input** → **+ Add Input** → search your **`flymatch`** dataset → **Add**.
-3. Right-hand panel → **Settings**:
-
-   | Setting | Value | Why |
-   |---|---|---|
-   | **Accelerator** | **GPU T4 x2** (or GPU P100) | the code uses one GPU |
-   | **Persistence** | **Files only** | checkpoints survive a session restart |
-   | **Internet** | **On** | `pip install` of the package |
-   | Language | Python | |
-
-4. Delete the starter cell. Open [`kaggle/kaggle_train.py`](kaggle/kaggle_train.py), copy **all** of it, and paste
-   it into **one** cell.
+1. finds the data and checks every file against its checksum;
+2. runs a 1-minute smoke test;
+3. trains **MLP, GNN-2, GNN-1, GNN-3** for seed 0, then all four for seed 1, then seed 2 — so if anything is cut short, every model still has a result;
+4. stops immediately if the MLP sanity run is far off its known score (≈ 0.616), so a broken setup can't burn hours;
+5. prints a results table and writes **`runs_out.zip`**.
 
 ---
 
-## 3 · Choose what to train
+## The manual way · upload it yourself
 
-The top of the cell has two lines to edit:
+Only needed if you rebuilt the package or want a private copy.
 
-```python
-EXPERIMENTS = ["configs/experiments/mlp.yaml", "configs/experiments/gnn_L1.yaml",
-               "configs/experiments/gnn_L2.yaml", "configs/experiments/gnn_L3.yaml"]
-SEEDS = "0,1,2"
-```
-
-| Experiment | What it is | What it tells you |
-|---|---|---|
-| `mlp.yaml` | B4: the same model with **0** message-passing layers | Sanity check — must land near **0.616** R@1 (the CPU result). If not, the GPU path is broken. |
-| `gnn_L1.yaml` | 1 directed layer | Does seeing direct partners help? |
-| `gnn_L2.yaml` | 2 layers (the planned default) | Partners of partners |
-| `gnn_L3.yaml` | 3 layers | Is there anything left at 3 hops? |
-
-**Recommended first session:** `mlp.yaml` + `gnn_L2.yaml`, `SEEDS = "0"`. Check the numbers, then run
-everything with `SEEDS = "0,1,2"`.
-
-To change hyper-parameters, edit or copy a YAML in `configs/experiments/`, then re-package and re-upload.
-Every key in `configs/train/default.yaml` can be overridden there.
+1. kaggle.com → **Datasets → + New Dataset** → drag in **`dist\flymatch_kaggle.zip`** (84 MB; Kaggle unpacks it, and the checksum list travels inside it). Title `flymatch` → **Create**.
+2. **Code → + New Notebook → File → Import Notebook** → `kaggle\flymatch_train.ipynb`.
+3. **Add Input** → your `flymatch` dataset; **Accelerator → GPU T4 x2**; **Save & Run All**.
 
 ---
 
-## 4 · Run
+## Bring the results home
 
-- **Quick / interactive:** click ▶ **Run** on the cell. You'll see lines like
-
-  ```text
-  torch 2.x | GPU: Tesla T4
-  [train] gnn_L2 seed 0 -> 20261028_gnn_L2_seed0_ab12cd34
-    step   100 loss 2.104 tau 0.069 val MRR 0.690 R@1 0.601 (45s)
-    ...
-    early stop at step 1300; best step 300
-  [train] gnn_L2 seed 0: T1 R@1 0.6xx (filtered 0.6xx) MRR 0.7xx | T2 macro 0.4xx
-  ```
-
-  Keep the browser tab open; interactive sessions stop after about 20 minutes idle.
-- **Long runs (recommended for 3 seeds × 4 experiments):** top right **Save Version** → **Save & Run All
-  (Commit)** → **Save**. This runs in the background for up to 12 h, even with your laptop closed.
-  Progress: **View Active Events**.
-
-Training checkpoints every **200 steps**, evaluates on validation every **100 steps**, keeps the best
-checkpoint, and stops early after 10 evaluations without improvement.
-
----
-
-## 5 · If the session dies
-
-Run the **same cell again** (with Persistence = Files only). Each unfinished run prints
-
-```text
-[train] gnn_L2 seed 0 -> 20261028_gnn_L2_seed0_ab12cd34 (resuming)
-  resumed from step 600 (best val MRR 0.712 at step 400)
-```
-
-and continues where it stopped. Finished runs are skipped
-(`already finished … — skipping`): a run counts as finished once it has a `metrics.json`. A new run starts only
-when you change its config.
-
----
-
-## 6 · Bring the results home
-
-1. When the cell finishes: right-hand panel **Output** (or the notebook's **Output** tab for a committed version)
-   → download **`runs_out.zip`**.
-2. Unzip it into the repository folder so that `runs\` lands next to `src\`:
+1. Open the notebook → the finished version → **Output** tab → download **`runs_out.zip`**.
+2. On the laptop:
    ```powershell
    Expand-Archive runs_out.zip -DestinationPath C:\projects\FLYbrain\flymatch -Force
-   ```
-3. Rebuild the results table:
-   ```powershell
+   cd C:\projects\FLYbrain\flymatch
    .venv\Scripts\python.exe -m flymatch.run aggregate
    ```
-   `results\baselines.csv` now has rows for `mlp`, `gnn_L1`, `gnn_L2` and `gnn_L3` next to B0–B4,
-   with mean ± sd over seeds. Runs made with a different split hash are rejected automatically.
-
-Each run folder contains `config.json`, `git_sha.txt`, `splits_sha256.txt`, `metrics.json` (all metrics +
-95% CIs + training history), `ranks.parquet` (per-query results) and `model.pt`.
+   `results\baselines.csv` now has `mlp`, `gnn_L1`, `gnn_L2`, `gnn_L3` (mean ± sd over seeds) next to B0–B4.
 
 ---
 
-## 7 · How to read the numbers
+## Reading the numbers
 
-| Metric | Bar to beat (validation) | Held by |
+| Metric (validation) | Bar to beat | Held by |
 |---|---|---|
-| T1 R@1, unfiltered (`T1/unfiltered/mean/R@1`) | **0.616 ± 0.007** | B4 MLP |
+| T1 R@1, unfiltered | **0.616 ± 0.007** | B4 MLP |
 | T1 MRR | **0.701** | B4 MLP |
 | T1 R@1, filtered | **0.830** | B3 cocoa-style |
 | T2 macro type accuracy | **0.574** | B3 cocoa-style |
 
-The plan's rule (hypothesis H2): the GNN wins only if it beats B4 by **more than the across-seed standard
-deviation**. If it doesn't by week 9, keep the MLP as the main model and report that message passing did
-not help. That is a legitimate result.
+The GNN counts as better only if it beats the MLP by **more than the across-seed standard deviation** (plan, hypothesis H2).
+If it doesn't, that is a legitimate result: keep the MLP as the main model and report it.
 
 ---
 
-## 🛠️ Troubleshooting
+## If something goes wrong
 
-| Symptom | Fix |
+| What you see | Do this |
 |---|---|
-| `Dataset not found` | Add Input → your `flymatch` dataset (step 2.2) |
-| `GPU: NONE` | Settings → Accelerator → GPU; phone-verify your account |
-| `pip install` fails | Settings → Internet → On |
-| CUDA out of memory | Use GPU P100 (16 GB) or set `model: {width: 128}` in the experiment YAML |
-| `mlp` gives far below 0.6 | The package is stale: rebuild it with `run package` and upload a new dataset version |
-| `aggregate` skips runs | They were made with a different split hash; the frozen split must not change |
-| Weekly GPU quota used up | It resets weekly; MLP experiments also run on the laptop CPU (`--device cpu`, ~5 min/seed) |
+| `Dataset not found` | Right-hand panel → **Add Input** → search `flymatch` → add the public dataset |
+| `No GPU` | **Settings → Accelerator → GPU T4 x2**; phone-verify the account |
+| `does not match its checksum` | The upload arrived incomplete. Dataset → **New Version** → re-upload the zip → re-run |
+| `Sanity check failed: MLP R@1 …` | The uploaded package is out of date. Rebuild (below) and upload a new dataset version |
+| A run prints `failed` | The others continue. The table at the end lists failures — send the error text |
+| The commit stopped before finishing (12 h limit) | Right panel **Add Input → Your Work** → add this notebook (its output) → **Save & Run All** again. Finished runs are skipped; unfinished ones resume from their checkpoint |
+| CUDA out of memory | Switch the accelerator to **GPU P100**, or set `model: {width: 128}` in the experiment YAML and rebuild |
+| Weekly GPU quota used up | It resets weekly. The MLP also trains on the laptop CPU in ~5 min per seed |
+
+---
+
+## Changing what gets trained
+
+The first code cell of the notebook has the lists:
+
+```python
+EXPERIMENTS = ["mlp", "gnn_L2", "gnn_L1", "gnn_L3"]   # files in configs/experiments/
+SEEDS = [0, 1, 2]
+```
+
+Edit them in the Kaggle editor before **Save & Run All**. To change hyper-parameters, edit or add a YAML in
+`configs/experiments/` on the laptop, then rebuild and upload a new dataset version.
+
+## Rebuilding the upload (only when code or data change)
+
+```powershell
+cd C:\projects\FLYbrain\flymatch
+.venv\Scripts\python.exe -m flymatch.run package
+```
+
+This writes `dist\flymatch_kaggle.zip` (with its checksum list inside) and `dist\flymatch_kaggle.zip.sha256`. On Kaggle: the `flymatch` dataset → **New Version** → drag in the new zip. (On a flaky connection, `--parts-mb 20` also writes the zip as 20 MB parts in `dist\kaggle_upload\`; the notebook joins them.)
+
+## Where the notebook comes from
+
+`kaggle/flymatch_train.ipynb` and `kaggle/kaggle_train.py` (the same code as one script, for pasting into a single cell) are generated together, so they never drift apart. Each run folder in `runs_out.zip` holds `config.json`, `splits_sha256.txt`, `metrics.json` (all metrics, 95% CIs, training history), `ranks.parquet` and `model.pt`. `aggregate` rejects runs made with a different split hash.
