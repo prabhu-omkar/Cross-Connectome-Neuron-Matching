@@ -20,7 +20,7 @@ Data and notebook are already on Kaggle, public:
 3. Right-hand panel → **Settings → Accelerator → GPU T4 x2** (GPU P100 also works).
 4. Top right: **Save Version → Save & Run All (Commit) → Save**.
 
-That's it. The public notebook itself has never been run — training happens only in your copy.
+That's it. Your copy trains on your own GPU quota. The public notebook's own run (version 2: MLP vs GNN with 1–3 layers, 3 seeds) is the reference result: open its **Output** tab to see the score table and download its `runs_out.zip`.
 Watch progress under **View Active Events** if you like. The notebook:
 
 1. finds the data and checks every file against its checksum;
