@@ -20,3 +20,4 @@ data/external/banc_dataverse_v3/banc_malecns_v0.9_nblast.feather
 configs/paths.yaml
 runs/
 dist/
+logs/

@@ -1,0 +1,5 @@
+# Week 9: gnn_L2 + hard negatives (k_neg = 50). If week-7 picks another depth, copy and change layers.
+name: gnn_L2_hn
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
+train: {max_steps: 3000, eval_every: 100, patience: 10, checkpoint_every: 200,
+        hard_negatives: {k: 50, per_anchor: 2, max_total: 4096}}

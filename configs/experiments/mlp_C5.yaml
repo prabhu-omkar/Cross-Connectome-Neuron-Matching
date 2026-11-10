@@ -1,0 +1,4 @@
+# Control C5: B4 MLP with training positives randomly re-paired. Expected: learned gains vanish. CPU-friendly.
+name: mlp_C5
+model: {layers: 0}
+controls: {label_permute: true}

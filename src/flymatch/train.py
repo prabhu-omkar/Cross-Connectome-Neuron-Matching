@@ -5,6 +5,12 @@ uniformly -> up to `per_type_per_side` neurons per dataset per side -> symmetric
 InfoNCE against in-batch neurons + random training-family negatives. Positives = same type_h
 AND side; same type on the other side is masked (neither positive nor negative).
 Validation T1 MRR every `eval_every` steps; best checkpoint kept; early stop on patience.
+
+Week 9 options (all off by default, so week-7 configs train exactly as before):
+  train.hard_negatives.k > 0   add negatives from each anchor's B1 shortlist (hardneg.py)
+  train.align.method = coral   class-conditional CORAL on shared seed types in the batch
+  controls.edge_permute        C4: degree-preserving permutation of both graphs (seeded)
+  controls.label_permute       C5: BANC seed types randomly re-paired with MaleCNS seed types
 """
 from __future__ import annotations
 
@@ -31,7 +37,9 @@ DEFAULTS = {
     "train": {"max_steps": 3000, "lr": 1e-3, "weight_decay": 1e-4, "warmup_steps": 100,
               "batch_types": 256, "per_type_per_side": 4, "easy_negatives": 1024,
               "tau_init": 0.07, "eval_every": 100, "patience": 10, "checkpoint_every": 200,
-              "align": {"method": "none", "weight": 0.1}},
+              "align": {"method": "none", "weight": 0.1},
+              "hard_negatives": {"k": 0, "per_anchor": 2, "max_total": 4096}},
+    "controls": {"edge_permute": False, "label_permute": False},
     "seed_fraction": 1.0, "draw": 0,
 }
 
@@ -70,6 +78,8 @@ class TrainData:
             self.groups[ds] = {k: g.uid.to_numpy() for k, g in s.groupby(["type_h", "side"], observed=True)}
             # negatives: included, TRAINING-family typed neurons only (never untyped, never val/test)
             self.neg_pool[ds] = n.uid[n.include & n.type_h.isin(train_types)].to_numpy()
+        if cfg["controls"]["label_permute"]:
+            self._permute_labels(np.random.default_rng([20261026, 5, cfg["draw"]]))
         both = set(self.groups["mcns"]) & set(self.groups["banc"])
         self.types = sorted({t for t, _ in both})
         self.sides_of = {}
@@ -78,7 +88,20 @@ class TrainData:
         self.graphs = None
         if cfg["model"]["layers"] > 0:
             from .graph import load_graphs
-            self.graphs = load_graphs(layout, undirected=cfg["model"]["direction"] == "undirected")
+            self.graphs = load_graphs(layout, undirected=cfg["model"]["direction"] == "undirected",
+                                      permute_seed=20261026 if cfg["controls"]["edge_permute"] else None)
+
+    def _permute_labels(self, rng):
+        """C5: re-pair training positives at random. Every BANC seed type takes the code (and group
+        key) of a randomly chosen other BANC seed type; evaluation still uses the true labels."""
+        types = sorted({t for t, _ in self.groups["banc"]})
+        perm = dict(zip(types, rng.permutation(types)))
+        code_of = {t: int(self.type_code["banc"][u[0]]) for (t, _), u in self.groups["banc"].items()}
+        new_code = self.type_code["banc"].copy()
+        for (t, _), u in self.groups["banc"].items():
+            new_code[u] = code_of[perm[t]]
+        self.type_code["banc"] = new_code
+        self.groups["banc"] = {(perm[t], s): u for (t, s), u in self.groups["banc"].items()}
 
     def sample(self, rng, batch_types, per):
         types = rng.choice(len(self.types), size=min(batch_types, len(self.types)), replace=False)
@@ -133,6 +156,14 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
     if data.graphs:
         data.graphs = {ds: (a.to(dev), b.to(dev)) for ds, (a, b) in data.graphs.items()}
     val_ctx = val_ctx or EvalContext.from_layout(layout, "val")
+    hn = tc["hard_negatives"]
+    shortlist = None
+    if hn["k"] > 0:
+        from .hardneg import build_shortlist
+        t_hn = time.time()
+        shortlist = build_shortlist(layout, data.groups, data.type_code, hn["k"], device=dev)
+        log(f"  hard-negative shortlists (B1 top-{hn['k']}): mcns {len(shortlist['mcns'][1]):,} anchors, "
+            f"banc {len(shortlist['banc'][1]):,} anchors ({time.time() - t_hn:.0f}s)")
     model = Encoder(data.f_in, mc["width"], mc["out_dim"], mc["layers"], mc["dropout"]).to(dev)
     log_tau = torch.nn.Parameter(torch.tensor(math.log(tc["tau_init"]), device=dev))
     opt = torch.optim.AdamW(list(model.parameters()) + [log_tau], lr=tc["lr"], weight_decay=tc["weight_decay"])
@@ -160,9 +191,14 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
     for step in range(start, tc["max_steps"]):
         model.train()
         b = data.sample(rng, tc["batch_types"], tc["per_type_per_side"])
+        hard = None
+        if shortlist is not None:
+            from .hardneg import sample as sample_hard
+            hard = sample_hard(shortlist, b, hn["per_anchor"], hn["max_total"], rng)
         for ds in ("mcns", "banc"):
             neg = rng.choice(data.neg_pool[ds], tc["easy_negatives"], replace=False)
-            b[ds] = np.unique(np.concatenate([b[ds], neg]))
+            parts = [b[ds], neg] + ([hard[ds]] if hard is not None else [])
+            b[ds] = np.unique(np.concatenate(parts))
         bi = {ds: torch.as_tensor(b[ds], device=dev) for ds in b}
         if data.graphs:
             z = {ds: model(data.X[ds], *data.graphs[ds])[bi[ds]] for ds in b}

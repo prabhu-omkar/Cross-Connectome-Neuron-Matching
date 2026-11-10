@@ -1,0 +1,4 @@
+# Ablation A2: B4 MLP without the hemilineage block (an annotation). Does an annotation do the work?
+name: mlp_A2
+model: {layers: 0}
+features: {drop_blocks: [hemilineage]}

@@ -1,0 +1,4 @@
+# Week 9: B4 MLP + class-conditional CORAL (shared seed types in the batch only). CPU-friendly.
+name: mlp_coral
+model: {layers: 0}
+train: {align: {method: coral, weight: 0.1}}

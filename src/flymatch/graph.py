@@ -30,22 +30,26 @@ def build(edges: pd.DataFrame, n: int, undirected: bool = False) -> tuple[torch.
     return A_in, A_out
 
 
-def permute_edges(edges: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+def permute_edges(edges: pd.DataFrame, rng: np.random.Generator, n: int | None = None) -> pd.DataFrame:
     """Control C4: degree-preserving permutation of the post column; recompute fractions."""
     from .harmonise import add_fractions
     e = edges[["pre_uid", "post_uid", "syn"]].copy()
     e["post_uid"] = e.post_uid.to_numpy()[rng.permutation(len(e))]
     e = e[e.pre_uid != e.post_uid]
     e = e.groupby(["pre_uid", "post_uid"], as_index=False).syn.sum()
-    n = int(max(edges.pre_uid.max(), edges.post_uid.max())) + 1
+    n = n or int(max(edges.pre_uid.max(), edges.post_uid.max())) + 1
     return add_fractions(e, n)
 
 
-def load_graphs(layout, undirected: bool = False) -> dict:
+def load_graphs(layout, undirected: bool = False, permute_seed: int | None = None) -> dict:
+    """permute_seed: control C4 — each dataset's edges are permuted (degree-preserving) first."""
     neurons = pd.read_parquet(layout.neurons, columns=["dataset"])
     edges = pd.read_parquet(layout.edges)
     out = {}
-    for ds in ("mcns", "banc"):
+    for i, ds in enumerate(("mcns", "banc")):
         n = int((neurons.dataset == ds).sum())
-        out[ds] = build(edges[edges.dataset == ds], n, undirected)
+        e = edges[edges.dataset == ds]
+        if permute_seed is not None:
+            e = permute_edges(e, np.random.default_rng([permute_seed, i]), n)
+        out[ds] = build(e, n, undirected)
     return out

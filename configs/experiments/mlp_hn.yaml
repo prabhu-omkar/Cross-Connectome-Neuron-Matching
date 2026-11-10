@@ -1,0 +1,4 @@
+# Week 9: B4 MLP + hard negatives from the B1 shortlist (k_neg = 50, 2 per anchor per step). CPU-friendly.
+name: mlp_hn
+model: {layers: 0}
+train: {hard_negatives: {k: 50, per_anchor: 2, max_total: 4096}}

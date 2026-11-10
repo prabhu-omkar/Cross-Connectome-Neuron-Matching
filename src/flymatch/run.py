@@ -9,6 +9,7 @@
     python -m flymatch.run train --exp configs/experiments/gnn_L2.yaml --seeds 0,1,2 [--device cuda]
     python -m flymatch.run package [--parts-mb 20]   # zip code + processed data for Kaggle (optionally in parts)
     python -m flymatch.run aggregate         # runs/ -> results/baselines.csv
+    python -m flymatch.run match --run runs/<run>   # week 10: abstention head + assignment -> matches.parquet
 """
 from __future__ import annotations
 
@@ -20,7 +21,7 @@ from .config import load_data_config
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="flymatch.run")
-    ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package"])
+    ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package", "match"])
     ap.add_argument("--config", default=None, help="data config (default configs/data.yaml)")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--exp", default=None, help="train: experiment yaml")
@@ -28,6 +29,7 @@ def main(argv=None):
     ap.add_argument("--seeds", default=None, help="train: comma list, overrides --seed")
     ap.add_argument("--device", default="auto")
     ap.add_argument("--methods", default=None, help="baselines: comma list of B0,B1,B1+region,B2,B2+,B3,B4")
+    ap.add_argument("--run", default=None, help="match: a trained run folder (runs/...)")
     ap.add_argument("--parts-mb", type=int, default=0, help="package: also split the zip into parts of this many MB")
     a = ap.parse_args(argv)
     cfg = load_data_config(a.config)
@@ -65,6 +67,12 @@ def main(argv=None):
         from .splits import load_splits
         layout = Layout(cfg)
         print(aggregate(load_splits(layout)["sha256"], layout.results / "baselines.csv").to_string())
+    if a.command == "match":
+        from .assign import run as match_run
+        from .config import Layout
+        if not a.run:
+            ap.error("match needs --run runs/<run folder>")
+        match_run(Layout(cfg), a.run, device="cpu" if a.device == "auto" else a.device)
     print(f"[run] {a.command} done in {time.time() - t0:.0f} s")
 
 

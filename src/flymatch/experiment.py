@@ -49,7 +49,10 @@ def run_experiment(layout: Layout, exp_path: str, seed: int, device: str = "auto
     torch.save(model.state_dict(), run / "model.pt")
     m, pq = evaluate(EmbeddingScorer(Z), ctx)
     ci = bootstrap_ci(pq)
-    save(run, m, pq, {**ci, "best_step": info["best_step"], "history": info["history"],
+    from .probe import domain_probe
+    import pandas as pd
+    probe = domain_probe(Z, pd.concat([ctx.sides[ds].neurons for ds in ("mcns", "banc")], ignore_index=True))
+    save(run, m, pq, {**ci, **probe, "best_step": info["best_step"], "history": info["history"],
                       "device": info["device"], "train_seconds": round(time.time() - t0, 1)})
     log(f"[train] {name} seed {seed}: T1 R@1 {m['T1/unfiltered/mean/R@1']:.3f} (filtered {m['T1/filtered/mean/R@1']:.3f}) "
         f"MRR {m['T1/unfiltered/mean/MRR']:.3f} | T2 macro {m['T2/unfiltered/mean/acc@1_macro']:.3f}")

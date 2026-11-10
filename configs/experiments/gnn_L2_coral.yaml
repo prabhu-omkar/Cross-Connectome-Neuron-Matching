@@ -1,0 +1,5 @@
+# Week 9: gnn_L2 + class-conditional CORAL (control C2 arm "CORAL").
+name: gnn_L2_coral
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
+train: {max_steps: 3000, eval_every: 100, patience: 10, checkpoint_every: 200,
+        align: {method: coral, weight: 0.1}}
