@@ -10,6 +10,7 @@
     python -m flymatch.run package [--parts-mb 20]   # zip code + processed data for Kaggle (optionally in parts)
     python -m flymatch.run aggregate         # runs/ -> results/baselines.csv
     python -m flymatch.run match --run runs/<run>   # week 10: abstention head + assignment -> matches.parquet
+    python -m flymatch.run seed-ablation [--methods B3,B4]   # B3/B4 x seed fractions x 3 draws -> results/seed_ablation.csv, F5
 """
 from __future__ import annotations
 
@@ -21,7 +22,8 @@ from .config import load_data_config
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="flymatch.run")
-    ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package", "match"])
+    ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package", "match",
+                                        "seed-ablation"])
     ap.add_argument("--config", default=None, help="data config (default configs/data.yaml)")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--exp", default=None, help="train: experiment yaml")
@@ -31,6 +33,8 @@ def main(argv=None):
     ap.add_argument("--methods", default=None, help="baselines: comma list of B0,B1,B1+region,B2,B2+,B3,B4")
     ap.add_argument("--run", default=None, help="match: a trained run folder (runs/...)")
     ap.add_argument("--parts-mb", type=int, default=0, help="package: also split the zip into parts of this many MB")
+    ap.add_argument("--fractions", default=None, help="seed-ablation: comma list (default 0.05,0.1,0.25,0.5)")
+    ap.add_argument("--draws", default=None, help="seed-ablation: comma list (default 0,1,2)")
     a = ap.parse_args(argv)
     cfg = load_data_config(a.config)
     t0 = time.time()
@@ -73,6 +77,12 @@ def main(argv=None):
         if not a.run:
             ap.error("match needs --run runs/<run folder>")
         match_run(Layout(cfg), a.run, device="cpu" if a.device == "auto" else a.device)
+    if a.command == "seed-ablation":
+        from . import seed_ablation as sa
+        sa.run(cfg, methods=a.methods.split(",") if a.methods else ("B3", "B4"),
+               fractions=[float(x) for x in a.fractions.split(",")] if a.fractions else sa.FRACTIONS,
+               draws=[int(x) for x in a.draws.split(",")] if a.draws else sa.DRAWS,
+               device="cpu" if a.device == "auto" else a.device)
     print(f"[run] {a.command} done in {time.time() - t0:.0f} s")
 
 

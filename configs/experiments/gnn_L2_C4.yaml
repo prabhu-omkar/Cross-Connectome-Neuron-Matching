@@ -1,5 +1,5 @@
 # Control C4: gnn_L2 on degree-preserving permuted graphs (node features unchanged). Expected: ~B4.
 name: gnn_L2_C4
 model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
-train: {max_steps: 3000, eval_every: 100, patience: 10, checkpoint_every: 200}
+train: {max_steps: 3000, eval_every: 100, patience: 5, checkpoint_every: 200}
 controls: {edge_permute: true}

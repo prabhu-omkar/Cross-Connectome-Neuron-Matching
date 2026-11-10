@@ -34,6 +34,8 @@ def run_experiment(layout: Layout, exp_path: str, seed: int, device: str = "auto
     exp = load_experiment(exp_path)
     name = exp.pop("name", Path(exp_path).stem)
     cfg = merge(DEFAULTS, {k: v for k, v in exp.items() if k in DEFAULTS})
+    if cfg["draw"] == "seed":          # seed-ablation configs: draw r is trained with seed r
+        cfg["draw"] = seed
     ctx = EvalContext.from_layout(layout, "val")
     method = exp.get("method", name)
     run_cfg = {"method": method, "eval_split": "val", "seed": seed, "seed_fraction": cfg["seed_fraction"],

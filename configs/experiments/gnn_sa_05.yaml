@@ -1,0 +1,9 @@
+# Seed ablation (plan 7.4.1): gnn_L2 trained on 05% of training families, nested draw r = seed r.
+# Run with --seeds 0,1,2. The 100% point is gnn_L2 itself (patience 5: replaying the gnn_L2 curves gives the identical best checkpoint, results/patience_sim.csv).
+# If week 8 picks L1, change layers here AND GNN_FULL in seed_ablation.py.
+name: gnn_sa_05
+method: GNN
+seed_fraction: 0.05
+draw: seed
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
+train: {max_steps: 3000, eval_every: 100, patience: 5, checkpoint_every: 200}

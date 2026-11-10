@@ -197,6 +197,69 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 
 ---
 
+## Week 8 — GNN depth, and the first half of the seed-ablation curve (10–11 Nov 2026)
+
+**Did**
+- Kaggle notebook version 2 (GPU T4, 11.2 h, no failures): `mlp`, `gnn_L1`, `gnn_L2`, `gnn_L3` × 3 seeds.
+  Brought back `runs_out.zip`; all 12 runs carry the frozen split hash; `run aggregate`.
+- `scripts/week8_compare.py`: paired family-bootstrap differences, same seed vs same seed
+  (`results/week8_depth_compare.csv`). `scripts/patience_sim.py` replays the validation curves under smaller
+  early-stopping patience (`results/patience_sim.csv`).
+- New command `run seed-ablation` (`seed_ablation.py`): cocoa-style (B3) and the MLP (B4) at 5/10/25/50 % of the
+  training families × 3 nested draws, on the laptop CPU. Also the MLP without hemilineage (`B4_A2`) on the same grid.
+  Output `results/seed_ablation.csv` and figure F5. GNN seed-ablation configs `gnn_sa_{05,10,25,50}` (draw = seed).
+
+**Found** (validation, mean ± sd over 3 seeds)
+
+| Method | R@1 | R@1 filtered | MRR | T2 macro | min / run (T4) |
+|---|---|---|---|---|---|
+| MLP (Kaggle) | 0.616 ± 0.003 | 0.660 | 0.700 | 0.434 | 2 |
+| GNN 1 layer | 0.754 ± 0.006 | 0.791 | 0.818 | 0.544 | 31 |
+| **GNN 2 layers** | **0.777 ± 0.007** | **0.813** | **0.835** | **0.578** | 66 |
+| GNN 3 layers | 0.773 ± 0.008 | 0.813 | 0.833 | 0.570 | 123 |
+
+- The Kaggle MLP reproduces the laptop B4 (0.616), so the GPU pipeline gives the same numbers.
+- GNN 2 layers − MLP = **+16.1 points R@1** (per-seed 95 % CIs all within [+0.12, +0.20]). The gain is far above
+  seed noise. H2 is not claimed until `gnn_L2_A2` (no hemilineage) is run.
+- 2 − 1 layers = +2.2 ± 1.3 points (one seed's CI touches 0); 3 − 2 layers = −0.4 ± 0.9 points. The third layer
+  doubles the time for nothing.
+- Still below cocoa-style on filtered R@1 (0.813 vs 0.830); T2 macro is a tie (0.578 vs 0.574).
+- Patience 5 would have picked exactly the same best checkpoint in all three 2-layer runs, about 18 min faster
+  each. Patience 3 would have lost 0.007 MRR on seed 0.
+- **Seed ablation (B3, B4 complete):**
+
+| Seed fraction | B3 R@1 | B3 filtered | B4 R@1 | B4 filtered |
+|---|---|---|---|---|
+| 5 % | 0.089 ± 0.004 | 0.265 | 0.544 ± 0.016 | 0.598 |
+| 10 % | 0.147 ± 0.033 | 0.418 | 0.560 ± 0.007 | 0.611 |
+| 25 % | 0.255 ± 0.022 | 0.625 | 0.586 ± 0.007 | 0.634 |
+| 50 % | 0.329 ± 0.008 | 0.758 | 0.596 ± 0.005 | 0.641 |
+| 100 % | 0.396 | 0.830 | 0.616 ± 0.007 | 0.661 |
+
+  B1 uses no seeds at all and reaches 0.347 / 0.493. Cocoa-style falls below it on filtered R@1 under 25 % seeds.
+  The MLP loses only 7 points from 100 % to 5 %.
+- The MLP without hemilineage (B4_A2, draw 0) gets 0.447 / 0.495 at 5 % and 0.505 / 0.561 at 50 %. That is
+  about 10 points under the MLP, but at 5–10 % seeds still far above cocoa-style. So hemilineage, a name shared
+  by both datasets, is not the only reason the learned model needs few labels. Draws 1–2 are in
+  `results/seed_ablation.csv`.
+
+**Decided**
+- **Main model = GNN, 2 layers** (L3 ties at 1.9× the time; L1 is the cheaper fallback).
+- Patience 5 for all new GNN configs (A2, C4, C5, hn, coral, seed ablation). The week-7 runs used 10;
+  `results/patience_sim.csv` shows this does not change the chosen checkpoint.
+- The seed-ablation GNN is the plain 2-layer model. It is frozen now, so the central curve does not wait on the
+  hard-negative and CORAL experiments; those are reported as separate arms.
+- The thesis framing is a crossover, not "the GNN wins everywhere". Expert label projection is best when most
+  types are known. The learned model is far better when few are (≤ 10 % of training families).
+
+**Next**
+- Kaggle session 3: `gnn_L2_A2`, `gnn_sa_05`, `gnn_sa_10`, `gnn_L2_C4` × 3 seeds, plus `gnn_L2_hn`,
+  `gnn_L2_coral` × 1 seed.
+- Laptop: `mlp_hn`, `mlp_coral`, `mlp_C5`; `match` on B4 seed 0 and on GNN 2 layers seed 0.
+- Later: `gnn_sa_25`, `gnn_sa_50`; the GNN without hemilineage at 5 %, if the A2 gap on the GNN is large.
+
+---
+
 <!-- Template for new entries
 ## Week N — title (date)
 
