@@ -238,10 +238,12 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 
   B1 uses no seeds at all and reaches 0.347 / 0.493. Cocoa-style falls below it on filtered R@1 under 25 % seeds.
   The MLP loses only 7 points from 100 % to 5 %.
-- The MLP without hemilineage (B4_A2, draw 0) gets 0.447 / 0.495 at 5 % and 0.505 / 0.561 at 50 %. That is
-  about 10 points under the MLP, but at 5–10 % seeds still far above cocoa-style. So hemilineage, a name shared
-  by both datasets, is not the only reason the learned model needs few labels. Draws 1–2 are in
-  `results/seed_ablation.csv`.
+- The MLP without hemilineage (B4_A2, 3 draws) gets R@1 0.439 ± 0.015 / filtered 0.492 at 5 %,
+  0.473 / 0.522 at 10 %, 0.497 / 0.550 at 25 % and 0.513 / 0.561 at 50 % (0.539 / 0.586 at 100 %). That is
+  about 8–10 points under the MLP at every fraction, but at 5–10 % seeds still about 3–5× cocoa-style on R@1
+  and above it on filtered R@1. So hemilineage, a name shared by both datasets, is not the only reason the
+  learned model needs few labels.
+- On T2 the curves cross: cocoa-style overtakes the MLP at roughly 35 % seeds (figure F5).
 
 **Decided**
 - **Main model = GNN, 2 layers** (L3 ties at 1.9× the time; L1 is the cheaper fallback).
