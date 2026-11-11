@@ -53,15 +53,19 @@ def aggregate(splits_sha256: str, out: Path) -> pd.DataFrame:
             print(f"[aggregate] skipping {d.name}: split hash {sha[:12]}… != frozen {splits_sha256[:12]}…")
             continue
         m = json.loads(f.read_text())
-        rows.append({"run": d.name, "method": cfg.get("method"), "split": cfg.get("eval_split"),
+        rows.append({"run": d.name, "finished": f.stat().st_mtime,
+                     "method": cfg.get("method"), "split": cfg.get("eval_split"),
                      "seed_fraction": cfg.get("seed_fraction", np.nan), "seed": cfg.get("seed", 0),
                      **{k: m.get(k) for k in HEADLINE},
                      "T1_R@1_ci": m.get("T1/mean/R@1_ci"), "T2_macro_ci": m.get("T2/mean/acc@1_macro_ci")})
     df = pd.DataFrame(rows)
     if df.empty:
         return df
-    # latest run per (method, split, seed_fraction, seed)
-    df = df.sort_values("run").groupby(["method", "split", "seed_fraction", "seed"], dropna=False).tail(1)
+    # latest run per (method, split, seed_fraction, seed) = most recently FINISHED (metrics.json mtime).
+    # Not the folder name: Kaggle dates folders in UTC and the name ends in a config hash, so two sessions'
+    # runs of the same method can share a date prefix and sort by hash.
+    df = df.sort_values(["finished", "run"]).groupby(["method", "split", "seed_fraction", "seed"],
+                                                     dropna=False).tail(1).drop(columns="finished")
     num = [c for c in HEADLINE if c in df]
     g = df.groupby(["method", "split", "seed_fraction"], dropna=False)
     agg = g[num].mean().add_suffix("")

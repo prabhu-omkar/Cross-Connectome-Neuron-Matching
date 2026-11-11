@@ -106,12 +106,13 @@ def collect(splits_sha256: str) -> pd.DataFrame:
         else:
             continue
         m = json.loads(f.read_text())
-        rows.append({"run": d.name, "method": meth, "seed_fraction": fr, "draw": int(draw),
+        rows.append({"run": d.name, "finished": f.stat().st_mtime, "method": meth, "seed_fraction": fr, "draw": int(draw),
                      **{k: m.get(v) for k, v in METRICS.items()}})
     df = pd.DataFrame(rows)
     if df.empty:
         return df
-    return df.sort_values("run").groupby(["method", "seed_fraction", "draw"]).tail(1)
+    # most recently finished per (method, fraction, draw) -- see runs.aggregate for why not the folder name
+    return df.sort_values(["finished", "run"]).groupby(["method", "seed_fraction", "draw"]).tail(1).drop(columns="finished")
 
 
 def table(df: pd.DataFrame) -> pd.DataFrame:

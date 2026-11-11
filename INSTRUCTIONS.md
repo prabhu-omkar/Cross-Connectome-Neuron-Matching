@@ -3,7 +3,7 @@
 Everything is prepared and public on Kaggle. Copy the notebook, switch on the GPU, press one button.
 Training runs on Kaggle's free GPU in the background — your laptop can be closed.
 
-> **Your time:** ~2 minutes. **Training time:** ~10–11 hours for the default week-9 list (14 runs on a T4; the 12 h session limit is enough). **Cost:** free (Kaggle gives ~30 GPU-hours/week).
+> **Your time:** ~2 minutes. **Training time:** ~4–5 hours for the default list (GNN seed ablation at 25 % and 50 %, 7 runs on a T4). **Cost:** free (Kaggle gives ~30 GPU-hours/week).
 > **Internet is not needed** inside the notebook — every dependency is already on Kaggle.
 
 ---
@@ -25,7 +25,7 @@ Watch progress under **View Active Events** if you like. The notebook:
 
 1. finds the data and checks every file against its checksum;
 2. runs a 1-minute smoke test;
-3. trains the list in the first code cell seed by seed (everything for seed 0, then seed 1, then seed 2) — so if anything is cut short, every experiment still has a result. The default list is the week-9 set: MLP (sanity), GNN without hemilineage (A2), GNN seed ablation at 5 % and 10 %, edge-permuted control C4, plus one seed each of hard negatives and CORAL;
+3. trains the list in the first code cell seed by seed (everything for seed 0, then seed 1, then seed 2) — so if anything is cut short, every experiment still has a result. The default list finishes the GNN seed-ablation curve: MLP (sanity), then the GNN trained on 25 % and 50 % of the training families;
 4. stops immediately if the MLP sanity run is far off its known score (≈ 0.616), so a broken setup can't burn hours;
 5. prints a results table and writes **`runs_out.zip`**.
 
@@ -88,8 +88,7 @@ If it doesn't, that is a legitimate result: keep the MLP as the main model and r
 The first code cell of the notebook has the lists:
 
 ```python
-EXPERIMENTS = ["mlp", "gnn_L2_A2", "gnn_sa_05", "gnn_sa_10", "gnn_L2_C4",
-               ("gnn_L2_hn", [0]), ("gnn_L2_coral", [0])]   # (name, [seeds]) overrides SEEDS
+EXPERIMENTS = ["mlp", "gnn_sa_25", "gnn_sa_50"]   # a (name, [seeds]) entry overrides SEEDS
 SEEDS = [0, 1, 2]
 ```
 

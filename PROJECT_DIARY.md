@@ -293,6 +293,56 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 - Unless the Kaggle GNN runs say otherwise, the final model stays the plain 2-layer GNN. Hard negatives and
   CORAL are reported as arms that did not help.
 
+## Week 9 (GPU part) — A2, C4, the GNN at 5 % and 10 % seeds (Kaggle session 3, 10–11 Nov 2026)
+
+**Did**
+- Kaggle notebook version 3 on dataset v2 (package from `fb47b59`; "10 data files verified against the manifest").
+  7.7 h, 17 runs, none failed: `mlp` (sanity), `gnn_L2_A2`, `gnn_sa_05`, `gnn_sa_10`, `gnn_L2_C4` × 3 seeds,
+  plus `gnn_L2_hn` and `gnn_L2_coral` × seed 0. All with patience 5. Weekly GPU use is about 19 of 30 h.
+- Paired family bootstrap, same seed vs same seed (draw r = seed r for the seed-ablation runs):
+  `results/week9_compare.csv`.
+
+**Found** (validation, mean ± sd over 3 seeds)
+
+| Run | R@1 | R@1 filtered | MRR | T2 macro |
+|---|---|---|---|---|
+| mlp (week-9 code) | 0.616 ± 0.006 | 0.661 | 0.699 | 0.434 |
+| gnn_L2 (session 2) | 0.777 ± 0.007 | 0.813 | 0.835 | 0.578 |
+| gnn_L2_A2, no hemilineage | 0.721 ± 0.007 | 0.761 | 0.784 | 0.534 |
+| gnn_L2_C4, edge-permuted graphs | 0.620 ± 0.002 | 0.663 | 0.703 | 0.422 |
+| GNN, 10 % seeds | 0.715 ± 0.005 | 0.757 | 0.782 | 0.523 |
+| GNN, 5 % seeds | 0.693 ± 0.011 | 0.740 | 0.763 | 0.520 |
+| gnn_L2_hn (seed 0) | 0.772 | 0.806 | 0.834 | 0.588 |
+| gnn_L2_coral (seed 0) | 0.771 | 0.809 | 0.828 | 0.572 |
+
+- **H2 holds without the annotation.** Without hemilineage, the GNN beats the MLP *with* hemilineage by
+  +10.5 points R@1 (per-seed CIs [+0.07, +0.15]) and the MLP without it by +18.2 ([+0.14, +0.22]).
+  Hemilineage is worth 5.6 points to the GNN, against 7.7 to the MLP.
+- **H5 holds (C4).** With degree-preserving edge permutation, the GNN falls exactly to the MLP:
+  +0.4 points vs B4 (CI [−0.02, +0.03]) and −15.6 vs the real GNN. The gain comes from who connects to whom,
+  not from degree or from having a graph at all.
+- **H3, the headline.** At 5 % seeds the GNN beats cocoa-style by +60.4 points R@1 and +47.5 filtered
+  (CIs [+0.39, +0.55] filtered). At 10 %: +56.8 / +33.9. It also beats the MLP at the same fraction by
+  +15 points.
+  - The GNN at 5 % equals cocoa-style at **50 %** on filtered R@1: −1.8 points, CI [−0.09, +0.04], not
+    significant. That is about **10× label efficiency**.
+  - The GNN keeps 91 % of its full-label filtered accuracy at 5 % seeds; cocoa-style keeps 32 %.
+  - Going from 100 % to 5 % costs the GNN 8.3 points R@1.
+- **Hard negatives / CORAL on the GNN:** 0.0 and −0.1 points vs gnn_L2 seed 0 (CIs ±0.02). Nothing.
+- **Code versions:** session 2 used the week-7 package; session 3 used `fb47b59`. The MLP sanity score is the
+  same within noise (0.616 vs 0.616 mean), so the sessions are comparable.
+- **Grouping bug found and fixed.** The notebook's own summary grouped by `method` and printed one "GNN"
+  row mixing 5 % and 10 %. Folder names are also no good for "latest run": Kaggle dates them in UTC and they
+  end in a hash, so session-2 and session-3 `mlp` runs sorted by hash. `aggregate`, `seed_ablation.collect`
+  and `week8_compare.run_of` now pick the most recently finished run (`metrics.json` time).
+  `FLYMATCH_BEFORE="2026-11-10 18:00"` reproduces the week-8 table exactly.
+
+**Decided**
+- **Gate G3: final model = plain `gnn_L2`** (2 layers, directed, patience 5). Hard negatives and CORAL are
+  reported as ablations that did not help, on the MLP (3 seeds) and the GNN (1 seed).
+- Next Kaggle session: `gnn_sa_25`, `gnn_sa_50` × 3 seeds (about 4–5 h) to finish the curve. The notebook's
+  results cell now groups by experiment name.
+
 ---
 
 <!-- Template for new entries
