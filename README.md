@@ -10,8 +10,8 @@
 [![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey.svg)](DATA_LICENSE.md)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-sparse%20GNN-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![Tests](https://img.shields.io/badge/tests-40%20passing-brightgreen.svg)](tests/)
-[![Progress](https://img.shields.io/badge/progress-week%207%20of%2016-orange.svg)](PROJECT_DIARY.md)
+[![Tests](https://img.shields.io/badge/tests-54%20passing-brightgreen.svg)](tests/)
+[![Progress](https://img.shields.io/badge/progress-week%2010%20of%2016-orange.svg)](PROJECT_DIARY.md)
 [![Split](https://img.shields.io/badge/benchmark%20split-frozen%20%C2%B7%20sha256%20260be072-purple.svg)](data/splits/splits_v1.json)
 
 [**Results**](#-results-so-far) · [**Quick start**](#-quick-start) · [**How it works**](#-how-it-works) · [**Data**](#-the-data) · [**Train on Kaggle**](INSTRUCTIONS.md) ([notebook](https://www.kaggle.com/code/omkarprabhuuuu/flymatch-train)) · [**Diary**](PROJECT_DIARY.md) · [**Roadmap**](#%EF%B8%8F-roadmap)
@@ -45,7 +45,7 @@ All numbers are on the validation split.
 - *Filtered* means the match must have the same super class, the same side and a compatible neurotransmitter.
 - 95% confidence intervals are bootstrapped over type families.
 
-The test split has **not** been touched.
+The test split has **not** been touched. The validation split was also used for early stopping and model choice, so these numbers are slightly optimistic.
 
 | | Method | Uses labels? | T1 R@1 | T1 R@1 (filtered) | T1 MRR | T2 acc@1 |
 |---|---|:-:|:-:|:-:|:-:|:-:|
@@ -53,21 +53,74 @@ The test split has **not** been touched.
 | B1 | √ neuropil in/out profiles (cosine) | – | 34.7% | 49.3% | 0.430 | 22.8% |
 | B2 | NBLAST morphology (published matrix) | – | 28.9% | 29.6% | 0.298 | 35.8% |
 | B2+ | B1 + NBLAST (z-scored sum) | – | 39.6% | 53.1% | 0.477 | 40.1% |
-| B3 | cocoa-style label-projected connectivity | ✔ | 39.6% | **83.0%** | 0.597 | **57.4%** |
-| B4 | MLP, contrastive (= GNN with 0 layers), 3 seeds | ✔ | **61.6 ± 0.7%** | 66.1% | **0.701** | 44.0% |
-| **GNN** | **Directed message passing, 1–3 layers** | ✔ | *training on Kaggle (weeks 7–8)* | | | |
+| B3 | cocoa-style label-projected connectivity | ✔ | 39.6% | 83.0% | 0.597 | 57.4% |
+| B4 | MLP, contrastive (= GNN with 0 layers), 3 seeds | ✔ | 61.6 ± 0.7% | 66.1% | 0.701 | 44.0% |
+| **GNN** | **Directed message passing, 2 layers, 3 seeds** (final model) | ✔ | **77.7 ± 0.7%** | 81.3% | **0.835** | 57.8% |
+| GNN + B3 | Equal-weight z-score ensemble, 3 seeds | ✔ | 59.1% | **85.1%** | 0.716 | **60.5%** |
 
-<p align="center"><img src="results/figures/F4_recall_at_k_val.png" width="92%" alt="Recall@k curves for all baselines"></p>
+The ensemble's unfiltered R@1 is low because B3 cannot tell left from right.
+
+<p align="center"><img src="results/figures/F5_seed_ablation.png" width="100%" alt="Seed ablation: accuracy versus the fraction of known matches"></p>
 
 **Headlines**
 
-- 🎯 **The bar for the GNN:** beat the MLP (61.6% R@1) and the cocoa-style baseline under filters (83.0%), each by more than the across-seed standard deviation.
+- 🧬 **Message passing helps, and the gain is real wiring.**
+  - The 2-layer GNN beats the MLP by **+16.1 points** R@1 (paired family-bootstrap CIs [+0.12, +0.20] on every seed).
+  - Without the shared hemilineage annotation it still wins by **+10.5**.
+  - With degree-preserving edge shuffling (control C4) the gain vanishes: +0.4, CI [−0.02, +0.03].
+- 📉 **Label efficiency, the central result (F5).** With **5%** of the known matches as training seeds:
+  - the GNN keeps **91%** of its full-label filtered accuracy (74.0%); cocoa-style keeps 32% (26.5%);
+  - the GNN beats cocoa-style at 5%, 10% and 25% seeds (+47.5, +33.9 and +14.9 points filtered, CIs > 0);
+  - at 50% they tie (+3.4, n.s.);
+  - only with **all** labels is cocoa-style (83.0%), and the GNN + cocoa-style ensemble (85.1%), better under filters.
+- 🎯 **Matching with "no counterpart".** On the final GNN (seed 0), one-to-one assignment has **precision 0.87, recall 0.69, F1 0.77** (MLP: 0.72 / 0.57 / 0.64).
+  - The abstention score is calibrated (ECE 0.024).
+  - It flags known female-specific BANC neurons at **2.0×** the base rate (Fisher p ≈ 10⁻⁶⁰).
+- 🪞 **What the domain gap costs (C3).** The same GNN finds a neuron's left↔right twin *within* one dataset at 93.5% (MaleCNS) and 84.6% (BANC), against 77.7% across datasets.
+  - Learning shrinks the gap from 22–35 points (B1) to 7–16 points.
+  - BANC's own reconstruction is the main limit.
+- 🧪 **Sanity checks behave.**
+  - Re-paired training labels (C5) cost −20.9 points; they fall to the feature-only level, not to chance, because the features are directly comparable.
+  - Hard negatives and CORAL bring no gain, so they are not adopted.
 - 🔗 **Connectivity carries real identity signal.** A zero-learning profile of *where* a neuron sends and receives synapses finds the exact partner among ~116,000 candidates 35% of the time. The shuffled control gets ≈ 0.1%.
 - ⚖️ **Honest ranking matters.** 8% of queries tie with hundreds of neurons, because their profiles sit in a single neuropil. Counting ties as wins inflates B1 (MaleCNS → BANC) from 36.0% to 40.5%. Every rank here uses average-tie ranks.
 - ↔️ **Label projection is side-blind.** B3 can't tell a partner's left copy from its right copy (40% at R@1, 73% at R@2). With a side filter it jumps to 83%.
 - 🔬 **Published NBLAST is reliable only for some classes.** It works for ascending and descending neurons (≈ 60% top-1 type accuracy) but is weak for central-brain and VNC neurons. Its top-100 lists contain the true partner for only 31% of pairs.
 
-Full analysis: [`docs/notes/phase1_weeks1-4.md`](docs/notes/phase1_weeks1-4.md) · [`docs/notes/phase2_weeks5-7.md`](docs/notes/phase2_weeks5-7.md)
+<details>
+<summary><b>Seed ablation in numbers</b> (T1 R@1 unfiltered / filtered, mean of 3 nested draws; <code>results/seed_ablation.csv</code>)</summary>
+
+| Seeds | Cocoa-style (B3) | MLP (B4) | MLP, no hemilineage | **GNN** | GNN + B3 |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| 5% | 8.9 / 26.5 | 54.4 / 59.8 | 43.9 / 49.2 | **69.3 / 74.0** | 43.5 / 56.1 |
+| 10% | 14.7 / 41.8 | 56.0 / 61.1 | 47.3 / 52.2 | **71.5 / 75.7** | 43.8 / 60.2 |
+| 25% | 25.5 / 62.5 | 58.6 / 63.4 | 49.7 / 55.0 | **73.6 / 77.5** | 48.8 / 71.3 |
+| 50% | 32.9 / 75.8 | 59.6 / 64.1 | 51.3 / 56.1 | **75.3 / 79.1** | 54.8 / 80.0 |
+| 100% | 39.6 / 83.0 | 61.6 / 66.1 | 53.9 / 58.6 | **77.7** / 81.3 | 59.1 / **85.1** |
+
+B1 uses no seeds at all: 34.7 / 49.3.
+
+</details>
+
+<details>
+<summary><b>Hemibrain transfer (control C1 / hypothesis H4): in progress</b></summary>
+
+The [hemibrain](https://www.janelia.org/project-team/flyem/hemibrain) is female like BANC but imaged like MaleCNS (FIB-SEM). The test:
+- train on BANC ↔ MaleCNS using only what the hemibrain also has: the 32 neuropils inside its volume and the restricted graph, with no neurotransmitter, super class or hemilineage;
+- then match hemibrain neurons zero-shot.
+
+Results on validation pairs (`results/c1_eval.csv`):
+
+| Pair | Differs in | B1 R@1 | MLP R@1 | GNN R@1 |
+|---|---|:-:|:-:|:-:|
+| hemibrain ↔ MaleCNS | sex | 52.9% | 55.7 ± 1.9% | *Kaggle session 5* |
+| hemibrain ↔ BANC | imaging | 25.0% | 29.8 ± 0.7% | *Kaggle session 5* |
+
+For raw profiles, imaging costs about twice as much as sex. The learned MLP keeps its gain over B1 on the imaging-only pair, which it never saw: MRR 0.406 vs 0.317.
+
+</details>
+
+Full analysis: [`docs/notes/phase1_weeks1-4.md`](docs/notes/phase1_weeks1-4.md) · [`docs/notes/phase2_weeks5-7.md`](docs/notes/phase2_weeks5-7.md) · [`docs/notes/phase3_weeks8-9.md`](docs/notes/phase3_weeks8-9.md) · [diary](PROJECT_DIARY.md)
 
 ---
 
@@ -83,7 +136,7 @@ py -3.11 -m venv .venv                       # (Linux/macOS: python3.11 -m venv 
 .venv\Scripts\python.exe -m pip install -e .
 
 .venv\Scripts\python.exe -m flymatch.run phase1      # raw CSVs → harmonised tables, features, ground truth, reports (~7 min)
-.venv\Scripts\python.exe -m pytest -q                # 40 tests: units, data contracts, leakage
+.venv\Scripts\python.exe -m pytest -q                # 54 tests: units, data contracts, leakage
 .venv\Scripts\python.exe -m flymatch.run baselines   # B0–B4 on validation → results/baselines.csv (~30 min, CPU)
 ```
 
@@ -101,7 +154,12 @@ The raw connectome exports are too large for GitHub: download them from [FlyWire
 | `python -m flymatch.run baselines [--methods B0,B1,B2,B2+,B3,B4]` | baselines through the evaluation harness → `runs/`, `results/baselines.csv`, F4 |
 | `python -m flymatch.run train --exp configs/experiments/gnn_L2.yaml --seeds 0,1,2 [--device cuda]` | train + evaluate; checkpoints every 200 steps, resumes automatically |
 | `python -m flymatch.run package` | build `dist/flymatch_kaggle.zip` for Kaggle (`--parts-mb 20` also splits it for a slow upload) |
-| `python -m flymatch.run aggregate` | all `runs/` → `results/baselines.csv` (rejects runs with a different split hash) |
+| `python -m flymatch.run aggregate` | all `runs/` → `results/baselines.csv` (latest finished run per method/seed; rejects runs with a different split hash) |
+| `python -m flymatch.run seed-ablation [--methods B3,B4,B4_A2,GNN+B3]` | seed-ablation grid (5–100% × 3 nested draws) → `results/seed_ablation.csv`, figure F5; picks up GNN runs from Kaggle |
+| `python -m flymatch.run match --run runs/<run>` | abstention head + one-to-one assignment with a "no counterpart" option → `matches.parquet` (needs ~8 GB RAM) |
+| `python -m flymatch.run hemibrain-download` · `hemibrain-prepare` · `c1-build` | hemibrain v1.2.1 from neuPrint (token needed) → completeness, type links, 1:1 pairs → restricted data variant `data/c1` |
+| `python scripts/week8_compare.py out.csv a:b …` | paired family-bootstrap differences between runs |
+| `python scripts/c3_mirror.py` · `scripts/c1_eval.py` | control C3 (within-dataset left↔right) · zero-shot hemibrain evaluation |
 | `python -m flymatch.smoke --layers 2` | full-graph GNN forward/backward memory + timing check |
 
 </details>
@@ -183,7 +241,11 @@ DirLayer:  h ← h + Dropout(GELU(LN( W_self·h  +  W_in·(A_in @ h)  +  W_out·
   - the same type on the other side is masked (neither positive nor negative);
   - negatives come only from **training** families.
 - **Type-balanced sampling** keeps the 89,000 optic-lobe columnar neurons from drowning everything else.
-- Coming in weeks 9–10: optional **class-conditional CORAL** or adversarial alignment, an abstention head, and Hungarian assignment.
+- **Depth = 2 layers.** It beats 1 layer by +2.2 points; a third layer adds nothing at 1.9× the time.
+- **Early stopping** on validation MRR, patience 5. Replaying the curves gives the same checkpoint as patience 10. Hard-negative mining (B1 top-50 shortlist) and class-conditional CORAL were tried and did not help.
+- **Matching:**
+  - an **abstention head**: logistic regression + isotonic calibration on frozen embeddings. Its features are the top-1 score, the margin to the runner-up, mutual nearest neighbour, and similar. It is trained by simulating partner removal on one half of the validation families and checked on the other half;
+  - **one-to-one assignment** with a "no counterpart" option at threshold τ, chosen on validation: exact Hungarian on small components, sparse LAPJV on large ones.
 
 ---
 
@@ -196,7 +258,8 @@ DirLayer:  h ← h + Dropout(GELU(LN( W_self·h  +  W_in·(A_in @ h)  +  W_out·
 | BANC metadata (proofread flag, sexual dimorphism) | [Harvard Dataverse](https://doi.org/10.7910/DVN/7WTH1N) v3 | CC BY 4.0 | download → `data/external/` (58 MB) |
 | BANC ↔ MaleCNS expert-reviewed matches · somas | Harvard Dataverse v3 | CC BY 4.0 | download → `data/external/` |
 | BANC ↔ MaleCNS v0.9 NBLAST matrix (912 MB) | Harvard Dataverse v3 | CC BY 4.0 | optional, for B2 only: download → `data/external/` |
-| Processed tables + features (Kaggle package, 84 MB) | generated by this code | CC BY 4.0 | [Kaggle dataset](https://www.kaggle.com/datasets/omkarprabhuuuu/flymatch) |
+| Hemibrain v1.2.1: traced neurons + ROI-split connections | [neuPrint](https://neuprint.janelia.org) (free token) | CC BY 4.0 | optional, for C1: `run hemibrain-download` → `data/external/hemibrain_v1.2.1/` |
+| Processed tables + features (+ C1 variant), Kaggle package | generated by this code | CC BY 4.0 | [Kaggle dataset](https://www.kaggle.com/datasets/omkarprabhuuuu/flymatch) |
 | Frozen benchmark split | this project | CC BY 4.0 | `data/splits/splits_v1.json` |
 
 Exact file IDs, sizes and download dates: [`data/external/SOURCES.md`](data/external/SOURCES.md). Attribution and citations: [`DATA_LICENSE.md`](DATA_LICENSE.md).
@@ -228,9 +291,12 @@ Cross-Connectome-Neuron-Matching/
 │   ├── data.yaml                    thresholds, inclusion rules, GT sources, split seed
 │   ├── paths.example.yaml           where the raw data lives (defaults: data/raw, data/external)
 │   ├── model/ · train/              GNN / MLP and training defaults
-│   └── experiments/                 mlp, gnn_L1, gnn_L2, gnn_L3, baselines, smoke test
+│   ├── data_c1.yaml                 C1 / H4 variant: hemibrain-restricted graph + features (data/c1)
+│   └── experiments/                 mlp, gnn_L1–L3, ablations (A2), controls (C4, C5), hn / coral,
+│                                    seed ablation (gnn_sa_05…50), C1 (gnn_c1, mlp_c1), smoke tests
 ├── maps/                            hand-maintained vocabulary maps (ingest fails on any unmapped value)
 │   ├── neuropil_map.csv             245 rows: raw → canonical neuropil, region, include, confidence, note
+│   ├── hemibrain_neuropil_map.csv   63 hemibrain primary ROIs → canonical neuropils
 │   └── superclass_map.csv · nt_map.csv · hemilineage_map.csv
 ├── data/
 │   ├── raw/{mcns,banc}/             the two Codex exports (read-only)
@@ -247,14 +313,19 @@ Cross-Connectome-Neuron-Matching/
 │   ├── graph.py                     sparse A_in / A_out, undirected variant, degree-preserving permutation
 │   ├── models/                      DirLayer, Encoder, InfoNCE / CORAL / gradient reversal
 │   ├── train.py · experiment.py     contrastive training with checkpoint/resume; config-driven runs
+│   ├── hardneg.py · probe.py        hard negatives from the B1 shortlist; type-balanced domain probe
+│   ├── abstention.py · assign.py · inference.py   "no counterpart" head; one-to-one assignment; embeddings from model.pt
+│   ├── seed_ablation.py             the seed-ablation grid, table and figure F5
+│   ├── hemibrain.py · c1.py         hemibrain ingest + links (C1 / H4); the restricted data variant
 │   ├── baselines/                   B0 random · B1 profiles · B2 NBLAST · B3 cocoa-style · B4 MLP
 │   ├── report.py · runs.py          Phase-1 reports; run folders + aggregation
 │   ├── package.py · smoke.py        Kaggle package; full-graph memory check
 │   └── run.py                       one CLI for everything
+├── scripts/                         paired comparisons, patience replay, C3 mirror control, C1 evaluation, match table
 ├── kaggle/flymatch_train.ipynb      the public Kaggle notebook (kaggle_train.py = same code as one cell)
 ├── results/                         every reported table and figure (written by scripts only)
 ├── docs/plan.md · docs/notes/       16-week plan; per-phase findings
-└── tests/                           40 tests: units, synthetic harness, data contracts, leakage
+└── tests/                           54 tests: units, synthetic harness, data contracts, leakage, controls
 ```
 
 ---
@@ -271,7 +342,12 @@ Cross-Connectome-Neuron-Matching/
 - 🎲 **Statistics:** 3 seeds per stochastic method; 95% CIs by bootstrapping **families**, not neurons; paired bootstrap for method comparisons.
 - 🧹 **Clean-subset reporting** (MaleCNS `Reviewed` + BANC proofread) for every headline number.
 - 🧾 **Every number comes from a script**, never a notebook. Every run folder stores the config, the git SHA and the split hash.
-- 🧭 **Planned controls:** degree-preserving edge shuffling (C4), label permutation (C5), within-dataset left↔right (C3), hemibrain transfer (C1).
+- 🧭 **Controls:**
+  - degree-preserving edge shuffling (C4) ✅;
+  - label re-pairing (C5) ✅. On the MLP it is never early-stopped on validation, because validation uses the *true* labels, which would rescue it;
+  - within-dataset left↔right (C3) ✅, evaluation form;
+  - hemibrain transfer (C1): MLP ✅, GNN in progress.
+- 🔍 **Model choice is documented** in [`docs/notes/phase3_weeks8-9.md`](docs/notes/phase3_weeks8-9.md): depth, patience, the hard-negative / CORAL decision, and the protocol fixes found along the way.
 
 ---
 
@@ -285,12 +361,12 @@ Cross-Connectome-Neuron-Matching/
 | 4 | Type families, stratified split — **frozen** (Gate G1) | ✅ |
 | 5 | Evaluation harness, B0 / B1 / B2, Recall@k, filters | ✅ |
 | 6 | B3 cocoa-style, B4 MLP, sparse graph + encoder (Gate G2) | ✅ |
-| 7 | GPU training, checkpoint/resume, Kaggle package · first GNN runs | 🟡 code ✅ · runs pending |
-| 8 | Multi-positive InfoNCE at scale; GNN vs MLP | ⬜ |
-| 9 | Hard negatives (k = 50 shortlist), CORAL — Gate G3 | ⬜ |
-| 10 | Abstention head, assignment, freeze model — Gate G4 | ⬜ |
-| 11–12 | **Seed-ablation curve**, ablations A1–A10, controls C2–C5, **test once** | ⬜ |
-| 13 | Hemibrain transfer (C1), error analysis | ⬜ |
+| 7 | GPU training, checkpoint/resume, Kaggle package · public Kaggle notebook | ✅ |
+| 8 | GNN vs MLP; depth (2 layers chosen) | ✅ |
+| 9 | Hard negatives, CORAL (both dropped); ablation A2; controls C4, C5 — Gate G3: final model = 2-layer GNN | ✅ |
+| 10 | Abstention head, assignment, GNN + B3 ensemble, C3 — Gate G4 | ✅ |
+| 11–12 | **Seed-ablation curve** ✅ · hemibrain ingest ✅ · GNN C5 · remaining ablations · **test once** | 🟡 |
+| 13 | Hemibrain transfer (C1): MLP ✅, GNN on Kaggle · error analysis | 🟡 |
 | 14–15 | Web tool (FastAPI + Streamlit): paste a neuron ID, get its counterpart | ⬜ |
 | 16 | Thesis, release, benchmark card, demo | ⬜ |
 
@@ -302,6 +378,8 @@ Day-by-day log: **[PROJECT_DIARY.md](PROJECT_DIARY.md)**.
 
 - **Circularity.** BANC types were partly assigned with NBLAST and connectivity matching to FlyWire, and MaleCNS types were harmonised against FlyWire. So the ground truth reaches across sexes through FlyWire names, and it was built with signals related to ours. Mitigations: the clean subset, manual inspection of errors, and comparing methods relative to each other.
 - **Naming ≠ biology.** Only 53% of the BANC team's expert-reviewed BANC ↔ MaleCNS matches share our harmonised type. The disagreements are naming schemes (`R7` vs `R7y`, `EFFabg*` vs `MNad*`), concentrated in sensory and motor neurons. Those classes are therefore under-represented in the one-to-one ground truth.
+- **Validation, not test.** Every number so far is on the validation split, which was also used for early stopping and model choice. The frozen test split is evaluated once, at the end.
+- **B3 is a re-implementation.** cocoa does not support BANC, so B3 is our own cocoa-style method. It is side-blind, which is why the fair comparison is the **filtered** one. There, cocoa-style still wins with all labels.
 - **Optic-lobe columns** (hundreds of near-identical copies) are evaluated at type level (T2), not neuron level.
 - **VNC neuropils** were merged coarsely, and `mVAC_T2` was excluded after failing merge validation.
 
