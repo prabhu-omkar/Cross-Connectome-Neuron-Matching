@@ -1,0 +1,8 @@
+# Control C5 (fixed protocol): B4 MLP with training positives randomly re-paired, NO validation-based
+# checkpoint choice (validation uses the TRUE labels, so early stopping would leak them and rescue the run).
+# Trains exactly as far as the real MLP's median best step (400; LR schedule still spans 3000), keeps the final weights.
+# Supersedes mlp_C5 (early-stopped: picked step 100 every seed, R@1 0.457, and fell to ~0.32 by step 1100).
+name: mlp_C5_last
+model: {layers: 0}
+train: {select: last, stop_at: 400}
+controls: {label_permute: true}

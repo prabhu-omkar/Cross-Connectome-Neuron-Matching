@@ -5,6 +5,9 @@ uniformly -> up to `per_type_per_side` neurons per dataset per side -> symmetric
 InfoNCE against in-batch neurons + random training-family negatives. Positives = same type_h
 AND side; same type on the other side is masked (neither positive nor negative).
 Validation T1 MRR every `eval_every` steps; best checkpoint kept; early stop on patience.
+`train.select: last` (opt-in, for controls): no early stop, keep the final weights. `train.stop_at: N`
+(opt-in) ends training at step N while the LR schedule still spans `max_steps` - the same trajectory a
+normal run follows up to step N.
 
 Week 9 options (all off by default, so week-7 configs train exactly as before):
   train.hard_negatives.k > 0   add negatives from each anchor's B1 shortlist (hardneg.py)
@@ -170,6 +173,8 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: _schedule(s, tc["warmup_steps"], tc["max_steps"]))
     from .baselines.scorers import EmbeddingScorer
     best, best_state, bad, history, best_step, start = -1.0, None, 0, [], 0, 0
+    select_last = tc.get("select", "best") == "last"   # opt-in, not in DEFAULTS (keeps old config hashes)
+    end = int(tc.get("stop_at", tc["max_steps"]))      # opt-in: stop early; the LR schedule still spans max_steps
     ckpt = None
     if ckpt_dir is not None:
         from pathlib import Path
@@ -185,10 +190,10 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
             best_step, start = st["best_step"], st["step"]
             log(f"  resumed from step {start} (best val MRR {best:.3f} at step {best_step})")
             if st.get("stopped"):
-                start = tc["max_steps"]
+                start = end
     t0 = time.time()
     stopped = False
-    for step in range(start, tc["max_steps"]):
+    for step in range(start, end):
         model.train()
         b = data.sample(rng, tc["batch_types"], tc["per_type_per_side"])
         hard = None
@@ -217,7 +222,7 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
         loss.backward()
         opt.step()
         sched.step()
-        if (step + 1) % tc["eval_every"] == 0 or step + 1 == tc["max_steps"]:
+        if (step + 1) % tc["eval_every"] == 0 or step + 1 == end:
             Z = embed_all(model, data)
             m, _ = evaluate(EmbeddingScorer(Z), val_ctx, filters=False, t1_only=True)
             mrr = m["T1/unfiltered/mean/MRR"]
@@ -231,10 +236,10 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
                 best_step = step + 1
             else:
                 bad += 1
-                if bad >= tc["patience"]:
+                if bad >= tc["patience"] and not select_last:
                     log(f"  early stop at step {step + 1}; best step {best_step}")
                     stopped = True
-        if ckpt is not None and ((step + 1) % tc["checkpoint_every"] == 0 or stopped or step + 1 == tc["max_steps"]):
+        if ckpt is not None and ((step + 1) % tc["checkpoint_every"] == 0 or stopped or step + 1 == end):
             _save_ckpt(ckpt, {"step": step + 1, "model": model.state_dict(), "opt": opt.state_dict(),
                               "sched": sched.state_dict(), "log_tau": log_tau.detach(), "rng": rng.bit_generator.state,
                               "torch_rng": torch.get_rng_state(), "best": best, "best_state": best_state,
@@ -244,7 +249,11 @@ def train(layout: Layout, cfg: dict, seed: int, val_ctx: EvalContext | None = No
                 raise SystemExit(f"simulated crash after checkpoint at step {step + 1}")
         if stopped:
             break
-    model.load_state_dict(best_state)
+    if select_last:      # controls: no validation-based choice (val uses TRUE labels -> would leak)
+        best_step = end   # never early-stops, so it always ends here
+    else:
+        model.load_state_dict(best_state)
     return model, embed_all(model, data), {"history": history, "best_val_MRR": best, "best_step": best_step,
+                                           "select": "last" if select_last else "best",
                                            "n_seed_types": len(data.seed_types), "n_train_types_used": len(data.types),
                                            "config": cfg, "seed": seed, "device": str(dev)}

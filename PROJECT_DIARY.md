@@ -260,6 +260,39 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 - Laptop: `mlp_hn`, `mlp_coral`, `mlp_C5`; `match` on B4 seed 0 and on GNN 2 layers seed 0.
 - Later: `gnn_sa_25`, `gnn_sa_50`; the GNN without hemilineage at 5 %, if the A2 gap on the GNN is large.
 
+## Week 9 (laptop part) — MLP variants and control C5 (11 Nov 2026)
+
+**Did**
+- `mlp_hn` (hard negatives from the B1 top-50 shortlist), `mlp_coral`, `mlp_C5` × 3 seeds on the CPU.
+  Paired differences vs the Kaggle `mlp`: `results/week9_mlp_variants.csv`
+  (`python scripts/week8_compare.py week9_mlp_variants.csv mlp_hn:mlp mlp_coral:mlp mlp_C5_last:mlp mlp_C5:mlp`).
+- New opt-in training options `train.select: last` (keep the final weights; no validation-based choice) and
+  `train.stop_at: N` (end at step N while the LR schedule still spans `max_steps`). Neither is in DEFAULTS, so
+  every existing config keeps its hash and finished runs are still recognised.
+
+**Found**
+- Hard negatives: +0.9 points R@1 (+1.0 filtered). The mean is above the seed spread, but every single seed's
+  CI includes 0. Each step is about 10× slower on the CPU.
+- CORAL: +0.2 points, no effect. Domain-probe accuracy 0.58 (hn 0.59), so the domain gap is already small for
+  the MLP.
+- **C5 protocol bug, found and fixed.** With re-paired labels, validation R@1 falls steadily as training
+  goes on (0.47 at step 100 → 0.32 at step 1100). Early stopping uses the TRUE validation labels, so it picked
+  step 100 on every seed and reported 0.457. That understates what the control measures.
+  `mlp_C5_last` trains to the real MLP's median best step (400) and keeps the final weights: R@1 0.406 ± 0.005,
+  i.e. **−20.9 points** vs the real MLP (per-seed CIs within [−0.26, −0.17]).
+- C5 does not fall to chance because the input features (neuropil profiles, hemilineage) are already
+  comparable across datasets: B1 gets 0.347 without any training. The honest reading is that the features give
+  about 0.35–0.40, and the true matches add about 21 points.
+
+**Decided**
+- Controls whose labels are corrupted are never early-stopped on validation. `gnn_L2_C5` now uses
+  `select: last, stop_at: 800` (gnn_L2's median best step). The old `mlp_C5` runs are kept as the record of
+  the bug.
+- The plan's expectation for C5 ("collapses to ≈ chance") is replaced by "falls to the feature-only level
+  (≈ B1)".
+- Unless the Kaggle GNN runs say otherwise, the final model stays the plain 2-layer GNN. Hard negatives and
+  CORAL are reported as arms that did not help.
+
 ---
 
 <!-- Template for new entries

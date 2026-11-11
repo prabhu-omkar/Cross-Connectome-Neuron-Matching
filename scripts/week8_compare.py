@@ -32,7 +32,28 @@ def run_of(method: str, seed: int) -> Path:
     return found[-1]
 
 
+def compare(pairs, out_name, seeds=(0, 1, 2)) -> pd.DataFrame:
+    """Paired R@1 differences a - b per seed -> results/<out_name>; prints the per-pair summary."""
+    rows = []
+    for a, b in pairs:
+        for s in seeds:
+            pa, pb = (pd.read_parquet(run_of(m, s) / "ranks.parquet") for m in (a, b))
+            for suf, lab in (("", "unfiltered"), ("_f", "filtered")):
+                r = paired_bootstrap(pa, pb, suf=suf, seed=s)
+                rows.append({"a": a, "b": b, "seed": s, "metric": f"T1 R@1 {lab}", "diff": r["diff"],
+                             "ci_lo": r["ci"][0], "ci_hi": r["ci"][1], "n": r["n"]})
+    df = pd.DataFrame(rows)
+    df.to_csv(REPO / "results" / out_name, index=False)
+    summ = df.groupby(["a", "b", "metric"]).agg(diff_mean=("diff", "mean"), diff_sd=("diff", "std"),
+                                                ci_lo_min=("ci_lo", "min"), ci_hi_max=("ci_hi", "max")).reset_index()
+    print(summ.to_string(index=False, float_format=lambda x: f"{x:+.3f}"))
+    return df
+
+
 def main():
+    if len(sys.argv) > 2:      # python scripts/week8_compare.py out.csv a:b [a:b ...]
+        compare([tuple(p.split(":")) for p in sys.argv[2:]], sys.argv[1])
+        return
     rows = []
     for a, b in PAIRS:
         for s in (0, 1, 2):
