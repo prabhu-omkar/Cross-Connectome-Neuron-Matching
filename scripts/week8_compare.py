@@ -33,7 +33,10 @@ PAIRS = [("gnn_L1", "mlp"), ("gnn_L2", "mlp"), ("gnn_L3", "mlp"), ("gnn_L2", "gn
 def run_of(method: str, seed: int) -> Path:
     """Most recently finished run of `method` / `seed`, or one finished before `before` (a datetime string
     'YYYY-MM-DD HH:MM', local time) - e.g. to pick the session-2 mlp after session 3 re-ran it."""
-    # `method` is a run name ("gnn_L2" -> *_gnn_L2_seed0_*) or a pattern with {seed} ("B3_sf0.05_draw{seed}")
+    # `method` is a run name ("gnn_L2" -> *_gnn_L2_seed0_*), a pattern with {seed} ("B3_sf0.05_draw{seed}"),
+    # or "=<folder>" for one exact run used for every seed (e.g. the deterministic B3 at 100 %)
+    if method.startswith("="):
+        return RUNS / method[1:]
     pat = f"*_{method.format(seed=seed)}_*" if "{seed}" in method else f"*_{method}_seed{seed}_*"
     found = [d for d in RUNS.glob(pat) if (d / "metrics.json").exists()]
     if BEFORE:

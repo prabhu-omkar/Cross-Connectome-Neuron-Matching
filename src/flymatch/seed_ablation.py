@@ -34,7 +34,7 @@ from .splits import load_splits  # noqa: E402
 
 FRACTIONS = (0.05, 0.10, 0.25, 0.50)
 DRAWS = (0, 1, 2)
-CURVE_METHODS = ("B3", "B4", "B4_A2", "GNN")
+CURVE_METHODS = ("B3", "B4", "B4_A2", "GNN", "GNN+B3")
 GNN_FULL = "gnn_L2"   # week-8 depth choice; change here if L1 is chosen (its seed_ablation configs must match)
 FULL_POINT = {GNN_FULL: "GNN", "mlp_A2": "B4_A2"}   # 100% runs made by `run train` under another method name
 METRICS = {"R@1": "T1/unfiltered/mean/R@1", "R@1_filtered": "T1/filtered/mean/R@1",
@@ -85,6 +85,39 @@ def run_b4(layout, ctx, f, d, log=print, device="cpu", variant="B4"):
     return m
 
 
+def gnn_run_for(f: float, seed: int):
+    """The finished GNN run trained on fraction f (seed = draw), or None."""
+    name = GNN_FULL if f >= 1 else f"gnn_sa_{int(round(f * 100)):02d}"
+    found = [d for d in RUNS.glob(f"*_{name}_seed{seed}_*") if (d / "metrics.json").exists() and (d / "model.pt").exists()]
+    return max(found, key=lambda d: (d / "metrics.json").stat().st_mtime) if found else None
+
+
+def run_ensemble(layout, ctx, f, d, gt, splits, neurons, edges, log=print):
+    """GNN + B3 with EQUAL weights (z-scored per query; no weight tuning - validation is the eval set).
+    Both members use the same seed set: GNN trained on draw d's fraction f, B3 projected on the same types."""
+    from .baselines.scorers import ZSumScorer
+    from .inference import embed_run
+    gnn = gnn_run_for(f, d)
+    if gnn is None:
+        log(f"[seed-ablation] GNN+B3 {f:g} draw {d}: no finished GNN run - skipped")
+        return None
+    fams = seed_families(gt, splits["train"], f, d)
+    st = seed_types(gt, fams)
+    cfg = {"eval_split": "val", "method": "GNN+B3", "seed": d, "seed_fraction": f, "draw": d,
+           "members": {"gnn_run": gnn.name, "b3_seed_types": len(st)}, "weights": [1.0, 1.0]}
+    run, status = find_or_new(f"GNNB3_sf{f:g}_draw{d}", cfg, ctx.splits_sha256)
+    if status == "done":
+        log(f"[seed-ablation] GNN+B3 {f:g} draw {d}: done in {run.name}")
+        return _done(run)
+    Z = embed_run(layout, gnn)
+    sc = ZSumScorer([EmbeddingScorer(Z), cocoa_style.build_scorer(neurons, edges, st)])
+    m, pq = evaluate(sc, ctx, block=256)
+    save(run, m, pq, bootstrap_ci(pq))
+    log(f"[seed-ablation] GNN+B3 {f:g} draw {d}: R@1 {m[METRICS['R@1']]:.3f} "
+        f"(filtered {m[METRICS['R@1_filtered']]:.3f}) T2 {m[METRICS['T2_macro']]:.3f}")
+    return m
+
+
 def collect(splits_sha256: str) -> pd.DataFrame:
     """One row per finished run that belongs on the curve (latest run per method/fraction/draw)."""
     rows = []
@@ -126,7 +159,8 @@ def figure(tab: pd.DataFrame, path):
     fig, ax = plt.subplots(1, 2, figsize=(12, 4.6))
     b1 = tab[tab.method == "B1"]
     style = {"B3": ("cocoa-style (B3)", "s", "--"), "B4": ("MLP (B4)", "o", "-"),
-             "B4_A2": ("MLP, no hemilineage (B4 A2)", "o", ":"), "GNN": ("GNN", "D", "-")}
+             "B4_A2": ("MLP, no hemilineage (B4 A2)", "o", ":"), "GNN": ("GNN", "D", "-"),
+             "GNN+B3": ("GNN + cocoa-style (equal z-weights)", "D", "--")}
     for a, (col, lab) in zip(ax, [("R@1", "T1 Recall@1 (unfiltered)"), ("T2_macro", "T2 type accuracy@1 (macro)")]):
         for meth, (name, mk, ls) in style.items():
             t = tab[tab.method == meth]
@@ -158,6 +192,11 @@ def run(cfg: dict | None = None, methods=("B3", "B4"), fractions=FRACTIONS, draw
         for d in draws:
             for f in fractions:
                 run_b3(layout, ctx, f, d, gt, splits, neurons, edges, log)
+    if "GNN+B3" in methods:
+        neurons, edges = pd.read_parquet(layout.neurons), pd.read_parquet(layout.edges)
+        for d in draws:
+            for f in (*fractions, 1.0):
+                run_ensemble(layout, ctx, f, d, gt, splits, neurons, edges, log)
     for variant in ("B4", "B4_A2"):
         if variant in methods:
             for d in draws:

@@ -24,7 +24,10 @@ def run_config(run_dir: Path) -> dict:
 
 
 @torch.no_grad()
-def embed_run(layout: Layout, run_dir: Path, device: str = "cpu") -> dict:
+def embed_run(layout: Layout, run_dir: Path, device: str = "cpu", mirror: bool = False) -> dict:
+    """mirror=True: every node's features are left<->right mirrored (feature_spec mirror_perm: _L/_R
+    neuropil columns and the side one-hot swapped) before the forward pass; the graph is unchanged.
+    Used by control C3 (scripts/c3_mirror.py)."""
     run_dir = Path(run_dir)
     cfg = run_config(run_dir)
     mc = cfg["model"]
@@ -41,9 +44,10 @@ def embed_run(layout: Layout, run_dir: Path, device: str = "cpu") -> dict:
         from .graph import load_graphs
         graphs = load_graphs(layout, undirected=mc["direction"] == "undirected",
                              permute_seed=20261026 if cfg["controls"]["edge_permute"] else None)
+    perm = np.asarray(spec["mirror_perm"]) if mirror else np.arange(len(spec["columns"]))
     Z = {}
     for ds in ("mcns", "banc"):
-        x = torch.as_tensor(np.load(layout.features(ds))[:, keep], device=device)
+        x = torch.as_tensor(np.ascontiguousarray(np.load(layout.features(ds))[:, perm][:, keep]), device=device)
         A = tuple(a.to(device) for a in graphs[ds]) if graphs else (None, None)
         Z[ds] = model.embed(x, *A).float().cpu().numpy()
     return Z

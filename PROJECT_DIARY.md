@@ -343,6 +343,58 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 - Next Kaggle session: `gnn_sa_25`, `gnn_sa_50` × 3 seeds (about 4–5 h) to finish the curve. The notebook's
   results cell now groups by experiment name.
 
+## Week 10 (start) — final-model matching, GNN + B3 ensemble, control C3 (11 Nov 2026)
+
+**Did**
+- `run match` on the final model (`gnn_L2` seed 0), run by the user from their own terminal: abstention head +
+  one-to-one assignment. A background shell is killed under memory pressure.
+- `run seed-ablation --methods GNN+B3`: GNN + cocoa-style, z-scored per query, **equal weights**. No weight
+  tuning, because validation is the evaluation set. Both members use the same seed set (GNN draw r = seed r,
+  B3 projected on the same types). Results in `results/seed_ablation.csv` and F5; paired comparisons in
+  `results/week9_ensemble_compare.csv`.
+- Control C3, evaluation form (`scripts/c3_mirror.py` → `results/c3_mirror.csv`):
+  - Inside one dataset, embed the dataset normally and with every node's features left↔right mirrored
+    (`embed_run(..., mirror=True)`; the graph is unchanged).
+  - Retrieve each left neuron's right twin, and vice versa: 414 MaleCNS and 299 BANC validation 1:1 pairs.
+  - Score this and the real cross-dataset task with one evaluator. It reproduces the harness exactly
+    (B1 0.347, MLP 0.616, GNN 0.777).
+
+**Found**
+- **Matching with the final GNN (validation):**
+  - Abstention: AUROC 0.709 (MLP 0.640), ECE 0.024.
+  - Known female-specific neurons flagged as "no counterpart": 71 % vs a 35 % base rate (2.0×, Fisher
+    p ≈ 1e-60).
+  - Assignment at τ_none 0.70: precision **0.867**, recall 0.692, **F1 0.770**. The MLP (old settings)
+    got F1 0.58–0.64.
+  - 72,503 of 159,632 MaleCNS neurons get a BANC partner (`matches.parquet`).
+- **Ensemble:**
+  - 100 % seeds: filtered R@1 **0.851 ± 0.000**, the best of any method. vs cocoa-style: +2.1 points,
+    per-seed CIs [+0.012, +0.032]. vs GNN alone: +3.8 points filtered, but −18.6 unfiltered, because
+    cocoa-style is side-blind and adds left/right ties. T2 macro 0.605, also the best.
+  - 5 % / 10 % seeds: 0.561 / 0.602 filtered, 15–18 points *below* the GNN alone. A weak member hurts at
+    equal weights.
+- **C3:**
+
+| Encoder | Cross | Within MaleCNS | Within BANC |
+|---|---|---|---|
+| B1 | 0.347 | 0.699 | 0.570 |
+| MLP | 0.616 ± 0.007 | 0.837 | 0.744 |
+| GNN | 0.777 ± 0.007 | 0.935 | 0.846 |
+
+  - Learning shrinks the cost of the domain gap: 22–35 points for B1 → 13–22 for the MLP → 7–16 for the GNN.
+  - Within BANC is always well below within MaleCNS, so BANC's own completeness limits matching.
+    The GNN's cross-dataset 0.777 is only 7 points below its within-BANC ceiling.
+  - These encoders were never trained for mirror symmetry, so "within" is a lower bound on the zero-gap
+    ceiling.
+
+**Decided**
+- **Two operating points for the thesis:**
+  - Few labels, or open (unfiltered) search → the GNN alone.
+  - Most types known, search within super class + side → GNN + cocoa-style.
+  The ensemble weights stay equal; not tuned.
+- C3 is reported in its evaluation form. A bilaterally *trained* C3 needs GPU time and a new training mode,
+  and is cut first if time is short (plan Section 12 cut order).
+
 ---
 
 <!-- Template for new entries
