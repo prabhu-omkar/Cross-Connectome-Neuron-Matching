@@ -13,6 +13,7 @@
     python -m flymatch.run seed-ablation [--methods B3,B4]   # B3/B4 x seed fractions x 3 draws -> results/seed_ablation.csv, F5
     python -m flymatch.run hemibrain-download   # neuPrint hemibrain v1.2.1 -> data/external/hemibrain_v1.2.1/ (C1/H4)
     python -m flymatch.run hemibrain-prepare    # neuropil completeness + hemibrain ground truth (C1/H4)
+    python -m flymatch.run c1-build             # data_c1/: hemibrain-restricted variant of the main data (C1/H4)
 """
 from __future__ import annotations
 
@@ -25,7 +26,7 @@ from .config import load_data_config
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="flymatch.run")
     ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package", "match",
-                                        "seed-ablation", "hemibrain-download", "hemibrain-prepare"])
+                                        "seed-ablation", "hemibrain-download", "hemibrain-prepare", "c1-build"])
     ap.add_argument("--config", default=None, help="data config (default configs/data.yaml)")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--exp", default=None, help="train: experiment yaml")
@@ -59,11 +60,13 @@ def main(argv=None):
         from .baselines import run_all
         run_all.run(cfg, a.methods.split(",") if a.methods else None)
     if a.command == "train":
-        from .config import Layout
-        from .experiment import run_experiment
+        from .config import REPO, Layout
+        from .experiment import load_experiment, run_experiment
         seeds = [int(x) for x in a.seeds.split(",")] if a.seeds else [a.seed]
+        dc = load_experiment(a.exp).get("data_config")      # e.g. C1: configs/data_c1.yaml (repo-relative)
+        layout = Layout(load_data_config(REPO / dc) if dc else cfg)
         for s in seeds:
-            run_experiment(Layout(cfg), a.exp, s, a.device)
+            run_experiment(layout, a.exp, s, a.device)
     if a.command == "package":
         from .package import build
         build(cfg, parts_mb=a.parts_mb)
@@ -89,6 +92,10 @@ def main(argv=None):
         from .config import Layout
         from .hemibrain import download
         download(Layout(cfg))
+    if a.command == "c1-build":
+        from .c1 import build as c1_build
+        from .config import REPO, Layout
+        c1_build(Layout(cfg), Layout(load_data_config(REPO / "configs" / "data_c1.yaml")))
     if a.command == "hemibrain-prepare":
         from .config import Layout
         from .hemibrain import prepare

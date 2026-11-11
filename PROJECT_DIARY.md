@@ -437,6 +437,60 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
   NT / super class, which hemibrain lacks), then evaluate zero-shot on hemibrain↔BANC and hemibrain↔MaleCNS
   against this B1.
 
+## Week 10 — Kaggle session 4 (GNN at 25 / 50 % seeds) and C1 set-up (11 Nov 2026)
+
+**Did**
+- **Kaggle session 4:** `gnn_sa_25` and `gnn_sa_50` × 3 seeds, plus the mlp sanity runs.
+  - The 6 GNN runs were imported. All carry the frozen split hash.
+  - The mlp reruns (0.614 / 0.621 / 0.620) were *not* imported. They share the config hash of session 3's runs,
+    and seed 2 even has the identical folder name. They confirm the package behaves the same.
+- **Ensemble at 25 / 50 %:** the GNN + B3 curve is complete.
+- **F5 now has three panels:** unfiltered R@1, filtered R@1 and T2. Cocoa-style's strength is the filtered
+  search, so leaving that panel out would flatter the GNN.
+- **C1 variant `data/c1`** (`run c1-build`, `configs/data_c1.yaml`, `src/flymatch/c1.py`):
+  - the same neurons, ground truth and split as the main data;
+  - graph and features restricted to the 32 neuropils inside the hemibrain volume: np_in/np_out, size_rank on
+    the restricted graph, side;
+  - no region summaries, NT, super class or hemilineage;
+  - neurons without synapses in those neuropils are not included: 31k MaleCNS, 24k BANC; 3,478 1:1 pairs,
+    of which 325 are in validation.
+- **Experiment configs choose their data variant** with a `data_config:` key. `run_cfg` then records `data_dir`,
+  so existing run hashes are unchanged.
+- **`scripts/c1_eval.py`:** zero-shot hemibrain evaluation; `mlp_c1` × 3 seeds on CPU.
+- **Package for session 5** (dataset v3, 115 MB): ships `data/c1`. The notebook list is `mlp`, `gnn_c1`,
+  `gnn_L2_C5`.
+
+**Found**
+- **GNN seed-ablation curve** (R@1 / filtered): 0.693 / 0.740 at 5 %, 0.715 / 0.757 at 10 %,
+  0.736 / 0.775 at 25 %, 0.753 / 0.791 at 50 %, 0.777 / 0.813 at 100 %.
+- **GNN − cocoa-style at the same fraction, filtered** (`results/week9_compare_sa.csv`):
+  - +47.5 / +33.9 / +14.9 points at 5 / 10 / 25 %, all CIs > 0;
+  - +3.4 at 50 % (CI [−0.02, +0.08]);
+  - −1.7 at 100 %.
+  The GNN beats the MLP by 14–16 points at every fraction.
+- **Ensemble, filtered R@1:**
+  - 0.561 / 0.602 / 0.713 / 0.800 / 0.851 at 5 / 10 / 25 / 50 / 100 %;
+  - it only pays at 100 %: +2.1 vs B3, +3.8 vs GNN (CI [−0.001, +0.069]);
+  - it ties the GNN at 50 % and is below it at ≤ 25 %.
+- **C1 MLP, zero-shot on hemibrain** (validation pairs; B1 = restricted profiles):
+
+| Pair | Differs in | B1 R@1 / MRR | mlp_c1 R@1 / MRR |
+|---|---|---|---|
+| hemibrain ↔ MaleCNS | sex | 0.529 / 0.609 | 0.557 ± 0.019 / 0.640 |
+| hemibrain ↔ BANC | imaging | 0.250 / 0.317 | 0.298 ± 0.007 / 0.406 |
+
+  The gain over B1 holds on the pair the model never saw and that differs only in imaging. It is larger there in
+  MRR (+0.089 vs +0.031). This modest evidence for H4 comes from the MLP; the GNN is session 5.
+- On the restricted variant, BANC↔MaleCNS itself drops to R@1 ≈ 0.29 for the MLP (0.616 on full features).
+  The 32 neuropils carry much less information.
+
+**Decided**
+- The thesis headline is the filtered-panel crossover:
+  - the GNN wins clearly up to 25 % seeds;
+  - ties at 50 %;
+  - cocoa-style (and the ensemble) win only with all labels.
+  Unfiltered gains are reported, but not headlined (B3 is side-blind).
+
 ---
 
 <!-- Template for new entries

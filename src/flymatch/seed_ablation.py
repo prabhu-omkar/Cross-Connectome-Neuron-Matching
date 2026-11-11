@@ -156,12 +156,14 @@ def table(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(tab: pd.DataFrame, path):
-    fig, ax = plt.subplots(1, 2, figsize=(12, 4.6))
+    fig, ax = plt.subplots(1, 3, figsize=(16, 5.2))
     b1 = tab[tab.method == "B1"]
     style = {"B3": ("cocoa-style (B3)", "s", "--"), "B4": ("MLP (B4)", "o", "-"),
              "B4_A2": ("MLP, no hemilineage (B4 A2)", "o", ":"), "GNN": ("GNN", "D", "-"),
              "GNN+B3": ("GNN + cocoa-style (equal z-weights)", "D", "--")}
-    for a, (col, lab) in zip(ax, [("R@1", "T1 Recall@1 (unfiltered)"), ("T2_macro", "T2 type accuracy@1 (macro)")]):
+    for a, (col, lab) in zip(ax, [("R@1", "T1 Recall@1 (unfiltered)"),
+                                  ("R@1_filtered", "T1 Recall@1 (filtered: super class, side, NT)"),
+                                  ("T2_macro", "T2 type accuracy@1 (macro)")]):
         for meth, (name, mk, ls) in style.items():
             t = tab[tab.method == meth]
             if t.empty:
@@ -173,9 +175,10 @@ def figure(tab: pd.DataFrame, path):
         a.set_xscale("log"); a.set_xticks([5, 10, 25, 50, 100]); a.set_xticklabels(["5", "10", "25", "50", "100"])
         a.set_xlabel("seed fraction of training families (%)"); a.set_ylabel(lab); a.grid(alpha=.3)
         a.set_ylim(0, 1)
-    ax[0].legend(fontsize=8, loc="lower right")
+    h, lab = ax[0].get_legend_handles_labels()
+    fig.legend(h, lab, loc="lower center", ncol=len(h), fontsize=8, frameon=False)
     fig.suptitle("Seed ablation on validation (mean ± sd over 3 nested draws)", fontsize=11)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     path.parent.mkdir(exist_ok=True)
     fig.savefig(path, dpi=130)
     plt.close(fig)

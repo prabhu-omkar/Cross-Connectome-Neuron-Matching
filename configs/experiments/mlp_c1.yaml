@@ -1,0 +1,4 @@
+# Control C1 / H4: the MLP (B4) on the hemibrain-restricted variant - is message passing what transfers?
+name: mlp_c1
+data_config: configs/data_c1.yaml
+model: {layers: 0}

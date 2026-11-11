@@ -1,0 +1,6 @@
+# Control C1 / H4: gnn_L2 trained on the hemibrain-restricted variant (data_c1: 32 neuropils inside the hemibrain
+# volume, restricted graph, no NT / super class / hemilineage). Evaluate zero-shot on hemibrain with scripts/c1_eval.py.
+name: gnn_c1
+data_config: configs/data_c1.yaml
+model: {layers: 2, width: 256, out_dim: 128, dropout: 0.1, direction: directed}
+train: {max_steps: 3000, eval_every: 100, patience: 5, checkpoint_every: 200}

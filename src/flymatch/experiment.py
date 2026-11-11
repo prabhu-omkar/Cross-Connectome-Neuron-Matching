@@ -40,6 +40,8 @@ def run_experiment(layout: Layout, exp_path: str, seed: int, device: str = "auto
     method = exp.get("method", name)
     run_cfg = {"method": method, "eval_split": "val", "seed": seed, "seed_fraction": cfg["seed_fraction"],
                "draw": cfg["draw"], "train_config": cfg}
+    if exp.get("data_config"):         # a data variant (e.g. C1); only then, so existing run hashes stay.
+        run_cfg["data_dir"] = Path(exp["data_config"]).stem      # config name, not folder: stable if it moves
     run, status = find_or_new(f"{name}_seed{seed}", run_cfg, ctx.splits_sha256)
     if status == "done":
         log(f"[train] {name} seed {seed}: already finished in {run.name} — skipping")

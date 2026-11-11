@@ -25,6 +25,10 @@ def build(cfg: dict | None = None, parts_mb: int = 0):
     missing = [p.name for p in data if not p.exists()]
     if missing:
         raise SystemExit(f"[package] missing {missing}; run `python -m flymatch.run data` first")
+    c1 = REPO / "data" / "c1"            # control C1 / H4 variant (run c1-build), shipped when present
+    if c1.exists():
+        data += sorted(f for f in c1.rglob("*") if f.is_file())
+        print(f"[package] including the C1 variant: {sum(1 for f in c1.rglob('*') if f.is_file())} files")
     out = REPO / "dist" / "flymatch_kaggle.zip"
     out.parent.mkdir(exist_ok=True)
     manifest = {}
