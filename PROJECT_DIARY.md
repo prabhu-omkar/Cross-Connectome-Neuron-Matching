@@ -395,6 +395,46 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
 - C3 is reported in its evaluation form. A bilaterally *trained* C3 needs GPU time and a new training mode,
   and is cut first if time is short (plan Section 12 cut order).
 
+## Week 10 — hemibrain ingest for C1 / H4 (11 Nov 2026)
+
+**Did**
+- `run hemibrain-download`: neuPrint `hemibrain:v1.2.1`, 97,900 Traced neurons; Traced → Traced pairs ≥ 5
+  synapses (the same threshold as our graphs), split by primary ROI. That is 955,818 pairs and 13.0 M synapses;
+  17 min. Stored in `data/external/hemibrain_v1.2.1/` (git-ignored).
+- `maps/hemibrain_neuropil_map.csv`: all 63 primary ROIs → our canonical neuropils (55 of 87 covered).
+- `run hemibrain-prepare`: harmonised hemibrain tables, neuropil completeness, type links, 1:1 pairs.
+- `scripts/hemibrain_check.py`: link validation and the C1 B1 baseline.
+
+**Found**
+- **Completeness: two effects.** Hemibrain counts only traced partners, so its "completeness" relative to
+  MaleCNS mixes two things:
+  - tracing completeness: 0.3–1.8 of the central-complex level on the right;
+  - truncation by the volume boundary: optic lobe, GNG, SAD and most left neuropils, ≤ 0.19.
+  The first rule (keep ≥ 0.8) kept only 14 neuropils and dropped clearly-inside ones such as AVLP_R and LH_R.
+  The current rule separates the two effects:
+  - right / midline neuropils: ≥ 0.25 (the gap);
+  - left neuropils: ≥ 0.7 of their own right mirror.
+  Result: **32 neuropils** (all right central brain, the central complex, ATL_L).
+- **Type links.** Only 350 of 5,620 hemibrain types link through the MaleCNS `hemibrain_type` label. A further
+  **2,816 link by identical name**: MaleCNS kept most hemibrain names, and the label mostly marks renamed types.
+  139 are ambiguous and 15 conflict; these stay unlinked.
+- **Name links validated.** B1 retrieval on the 32 neuropils is as good or better for name links as for label
+  links: hemibrain↔MaleCNS R@1 0.495 vs 0.401.
+- **1:1 pairs.** 2,073 hemibrain↔MaleCNS (val 183) and 1,773 hemibrain↔BANC (val 160).
+- **C1 B1 baseline** (validation families, same-side gallery):
+
+| Pair | Differs in | B1 R@1 |
+|---|---|---|
+| hemibrain ↔ MaleCNS | sex only, same FIB-SEM imaging | 0.523 |
+| hemibrain ↔ BANC | imaging only, both female | 0.247 |
+
+  For raw profiles, reconstruction/imaging costs about twice as much as sex. This is the confound H4 tests.
+
+**Next**
+- C1 proper (GPU): train BANC↔MaleCNS on hemibrain-restricted features (the 32 neuropils, no hemilineage /
+  NT / super class, which hemibrain lacks), then evaluate zero-shot on hemibrain↔BANC and hemibrain↔MaleCNS
+  against this B1.
+
 ---
 
 <!-- Template for new entries

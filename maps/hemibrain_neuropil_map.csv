@@ -1,0 +1,64 @@
+dataset,raw,canonical,region,include,confidence,note
+hemibrain,AB(L),FB,CB,1,medium,asymmetric body beside FB (as for MaleCNS)
+hemibrain,AB(R),FB,CB,1,medium,asymmetric body beside FB (as for MaleCNS)
+hemibrain,AL(L),AL_L,CB,1,high,identical name
+hemibrain,AL(R),AL_R,CB,1,high,identical name
+hemibrain,AME(R),AME_R,OL,1,high,identical name
+hemibrain,AOTU(R),AOTU_R,CB,1,high,identical name
+hemibrain,ATL(L),ATL_L,CB,1,high,identical name
+hemibrain,ATL(R),ATL_R,CB,1,high,identical name
+hemibrain,AVLP(R),AVLP_R,CB,1,high,identical name
+hemibrain,BU(L),BU_L,CB,1,high,identical name
+hemibrain,BU(R),BU_R,CB,1,high,identical name
+hemibrain,CA(L),MB_CA_L,CB,1,medium,mushroom-body calyx
+hemibrain,CA(R),MB_CA_R,CB,1,medium,mushroom-body calyx
+hemibrain,CAN(R),CAN_R,CB,1,high,identical name
+hemibrain,CRE(L),CRE_L,CB,1,high,identical name
+hemibrain,CRE(R),CRE_R,CB,1,high,identical name
+hemibrain,EB,EB,CB,1,high,identical name
+hemibrain,EPA(L),EPA_L,CB,1,high,identical name
+hemibrain,EPA(R),EPA_R,CB,1,high,identical name
+hemibrain,FB,FB,CB,1,high,identical name
+hemibrain,FLA(R),FLA_R,CB,1,high,identical name
+hemibrain,GNG,GNG,GNG,1,high,identical name
+hemibrain,GOR(L),GOR_L,CB,1,high,identical name
+hemibrain,GOR(R),GOR_R,CB,1,high,identical name
+hemibrain,IB,IB,CB,1,high,identical name
+hemibrain,ICL(L),ICL_L,CB,1,high,identical name
+hemibrain,ICL(R),ICL_R,CB,1,high,identical name
+hemibrain,IPS(R),IPS_R,CB,1,high,identical name
+hemibrain,LAL(L),LAL_L,CB,1,high,identical name
+hemibrain,LAL(R),LAL_R,CB,1,high,identical name
+hemibrain,LH(R),LH_R,CB,1,high,identical name
+hemibrain,LO(R),LO_R,OL,1,high,identical name
+hemibrain,LOP(R),LOP_R,OL,1,high,identical name
+hemibrain,ME(R),ME_R,OL,1,high,identical name
+hemibrain,NO,NO,CB,1,high,identical name
+hemibrain,PB,PB,CB,1,high,identical name
+hemibrain,PED(R),MB_PED_R,CB,1,medium,mushroom-body peduncle
+hemibrain,PLP(R),PLP_R,CB,1,high,identical name
+hemibrain,PRW,PRW,GNG,1,high,identical name
+hemibrain,PVLP(R),PVLP_R,CB,1,high,identical name
+hemibrain,SAD,SAD_AMMC,GNG,1,medium,hemibrain SAD includes AMMC (as for MaleCNS)
+hemibrain,SCL(L),SCL_L,CB,1,high,identical name
+hemibrain,SCL(R),SCL_R,CB,1,high,identical name
+hemibrain,SIP(L),SIP_L,CB,1,high,identical name
+hemibrain,SIP(R),SIP_R,CB,1,high,identical name
+hemibrain,SLP(R),SLP_R,CB,1,high,identical name
+hemibrain,SMP(L),SMP_L,CB,1,high,identical name
+hemibrain,SMP(R),SMP_R,CB,1,high,identical name
+hemibrain,SPS(L),SPS_L,CB,1,high,identical name
+hemibrain,SPS(R),SPS_R,CB,1,high,identical name
+hemibrain,VES(L),VES_L,CB,1,high,identical name
+hemibrain,VES(R),VES_R,CB,1,high,identical name
+hemibrain,WED(R),WED_R,CB,1,high,identical name
+hemibrain,a'L(L),MB_VL_L,CB,1,medium,alpha' lobe = part of the vertical lobe
+hemibrain,a'L(R),MB_VL_R,CB,1,medium,alpha' lobe = part of the vertical lobe
+hemibrain,aL(L),MB_VL_L,CB,1,medium,alpha lobe = part of the vertical lobe
+hemibrain,aL(R),MB_VL_R,CB,1,medium,alpha lobe = part of the vertical lobe
+hemibrain,b'L(L),MB_ML_L,CB,1,medium,beta' lobe = part of the medial lobe
+hemibrain,b'L(R),MB_ML_R,CB,1,medium,beta' lobe = part of the medial lobe
+hemibrain,bL(L),MB_ML_L,CB,1,medium,beta lobe = part of the medial lobe
+hemibrain,bL(R),MB_ML_R,CB,1,medium,beta lobe = part of the medial lobe
+hemibrain,gL(L),MB_ML_L,CB,1,medium,gamma lobe = part of the medial lobe
+hemibrain,gL(R),MB_ML_R,CB,1,medium,gamma lobe = part of the medial lobe

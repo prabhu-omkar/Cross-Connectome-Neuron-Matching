@@ -11,6 +11,8 @@
     python -m flymatch.run aggregate         # runs/ -> results/baselines.csv
     python -m flymatch.run match --run runs/<run>   # week 10: abstention head + assignment -> matches.parquet
     python -m flymatch.run seed-ablation [--methods B3,B4]   # B3/B4 x seed fractions x 3 draws -> results/seed_ablation.csv, F5
+    python -m flymatch.run hemibrain-download   # neuPrint hemibrain v1.2.1 -> data/external/hemibrain_v1.2.1/ (C1/H4)
+    python -m flymatch.run hemibrain-prepare    # neuropil completeness + hemibrain ground truth (C1/H4)
 """
 from __future__ import annotations
 
@@ -23,7 +25,7 @@ from .config import load_data_config
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="flymatch.run")
     ap.add_argument("command", choices=["data", "split", "report", "b1", "phase1", "baselines", "aggregate", "train", "package", "match",
-                                        "seed-ablation"])
+                                        "seed-ablation", "hemibrain-download", "hemibrain-prepare"])
     ap.add_argument("--config", default=None, help="data config (default configs/data.yaml)")
     ap.add_argument("--freeze", action="store_true")
     ap.add_argument("--exp", default=None, help="train: experiment yaml")
@@ -83,6 +85,14 @@ def main(argv=None):
                fractions=[float(x) for x in a.fractions.split(",")] if a.fractions else sa.FRACTIONS,
                draws=[int(x) for x in a.draws.split(",")] if a.draws else sa.DRAWS,
                device="cpu" if a.device == "auto" else a.device)
+    if a.command == "hemibrain-download":
+        from .config import Layout
+        from .hemibrain import download
+        download(Layout(cfg))
+    if a.command == "hemibrain-prepare":
+        from .config import Layout
+        from .hemibrain import prepare
+        prepare(Layout(cfg))
     print(f"[run] {a.command} done in {time.time() - t0:.0f} s")
 
 

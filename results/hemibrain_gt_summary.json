@@ -1,0 +1,26 @@
+{
+ "hemibrain_types": 5620,
+ "type_link": {
+  "name": 2816,
+  "unlinked": 2300,
+  "label": 350,
+  "ambiguous": 139,
+  "conflict": 15
+ },
+ "hemibrain_neurons_by_side": {
+  "unknown": 78644,
+  "right": 15297,
+  "left": 3959
+ },
+ "pairs_mcns": {
+  "train": 1420,
+  "test": 458,
+  "val": 183,
+  "none": 12
+ },
+ "pairs_banc": {
+  "train": 1233,
+  "test": 380,
+  "val": 160
+ }
+}

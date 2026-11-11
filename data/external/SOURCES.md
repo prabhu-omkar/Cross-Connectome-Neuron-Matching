@@ -28,3 +28,16 @@ optic-lobe:v1.0.1/v1.1. Processes started before `setx` don't see it; read it wi
 ## Still to do
 
 - Optional: MaleCNS `body-annotations-male-cns-v1.0-minconf-0.5.feather` (male-cns.janelia.org/download).
+
+## hemibrain_v1.2.1/ — neuPrint `hemibrain:v1.2.1` (control C1 / H4)
+
+Downloaded 2026-11-11 with `python -m flymatch.run hemibrain-download` (neuprint-python 0.6.4), into
+`flymatch/data/external/hemibrain_v1.2.1/`. Unmodified query answers; details in its `manifest.json`.
+
+| File | Content | Rows |
+|---|---|---|
+| `neurons.parquet` | every `status = 'Traced'` neuron: bodyId (int64), instance, type, status, cropped, pre, post, cellBodyFiber, somaLocation | 97,900 |
+| `connections_roi.parquet` | Traced → Traced pairs with ≥ 5 synapses in total, split by primary ROI (`fetch_adjacencies`) | 1,544,338 (955,818 pairs, 13.0 M synapses) |
+| `manifest.json` | dataset, client version, date, counts | — |
+
+Derived tables (`run hemibrain-prepare`) go to `flymatch/data/processed/hemibrain/`.
