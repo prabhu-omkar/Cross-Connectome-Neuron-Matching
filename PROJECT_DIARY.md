@@ -364,8 +364,10 @@ bottom. Week numbers follow the 16-week plan in [`docs/plan.md`](docs/plan.md).
   - Abstention: AUROC 0.709 (MLP 0.640), ECE 0.024.
   - Known female-specific neurons flagged as "no counterpart": 71 % vs a 35 % base rate (2.0×, Fisher
     p ≈ 1e-60).
-  - Assignment at τ_none 0.70: precision **0.867**, recall 0.692, **F1 0.770**. The MLP (old settings)
-    got F1 0.58–0.64.
+  - Assignment at τ_none 0.70: precision **0.867**, recall 0.692, **F1 0.770**.
+  - Same settings for the MLP (B4 seed 0, rerun by the user): AUROC 0.640, P 0.723, R 0.567, F1 0.635.
+    The GNN gains +0.069 AUROC, +14 points precision, +13 recall, +0.13 F1, and 2.0× vs 1.6× enrichment
+    of female-specific flags. `results/match_compare.csv` (`scripts/match_table.py`).
   - 72,503 of 159,632 MaleCNS neurons get a BANC partner (`matches.parquet`).
 - **Ensemble:**
   - 100 % seeds: filtered R@1 **0.851 ± 0.000**, the best of any method. vs cocoa-style: +2.1 points,
